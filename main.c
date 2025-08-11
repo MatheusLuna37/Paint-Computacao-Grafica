@@ -5,6 +5,34 @@
 int screenWidth = 1280;
 int screenHeight = 720;
 
+typedef struct Ponto {
+    float x, y;
+} Ponto;
+
+typedef struct Linha {
+    Ponto p, q;
+} Linha;
+
+typedef struct Poligono {
+    Ponto *vertices;
+} Poligonos;
+
+typedef PontosHead {
+
+}
+
+typedef struct Pontos {
+    Ponto ponto;
+    Ponto proximo;
+} Pontos;
+
+int novo_ponto(Ponto ponto, Ponto **pontos) {
+    *pontos.proximo = ponto;
+    *pontos.proximo.
+}
+
+Ponto *pontos;
+
 // Estado
 bool pivotDefinido = false;
 bool desenhando = false;

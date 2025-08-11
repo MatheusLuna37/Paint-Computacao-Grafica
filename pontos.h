@@ -1,0 +1,1 @@
+typedef struct PontoEl *Pontos;
