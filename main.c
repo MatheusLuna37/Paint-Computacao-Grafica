@@ -1,91 +1,87 @@
 #include <GL/glut.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <windows.h>
+#include "pontos.h"
 
 int screenWidth = 1280;
 int screenHeight = 720;
 
-typedef struct Ponto {
-    float x, y;
-} Ponto;
-
-typedef struct Linha {
-    Ponto p, q;
-} Linha;
-
-typedef struct Poligono {
-    Ponto *vertices;
-} Poligonos;
-
-typedef PontosHead {
-
-}
-
-typedef struct Pontos {
-    Ponto ponto;
-    Ponto proximo;
-} Pontos;
-
-int novo_ponto(Ponto ponto, Ponto **pontos) {
-    *pontos.proximo = ponto;
-    *pontos.proximo.
-}
-
-Ponto *pontos;
+Pontos *pontos;
 
 // Estado
 bool pivotDefinido = false;
-bool desenhando = false;
-
+Pontos ponto_selecionado = NULL;
+int modo = -1;
+/*
+-1: nenhum
+0: selecionar
+1: desenhar
+*/
 int objeto = -1;
+/*
+-1: nenhum
+1: ponto
+2: linha
+3: polígono
+*/
 
-// Coordenadas
-float pivotX, pivotY;
 float mouseX, mouseY;
 
-// Converte coordenadas da janela para coordenadas OpenGL (-1 a 1)
-float toGLX(int x, int width) {
-    return (2.0f * x / width) - 1.0f;
-}
+void init() {
+    glClearColor(1.0, 1.0, 1.0, 0.0);
 
-float toGLY(int y, int height) {
-    return 1.0f - (2.0f * y / height);
+    glMatrixMode(GL_PROJECTION);
+    gluOrtho2D(0.0, screenWidth, 0.0, screenHeight);
+
+    pontos = inicializar_pontos();
 }
 
 // Callback de clique do mouse
 void mouse(int button, int state, int x, int y) {
-    /*
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-        for (int i=0; i<3; i++) {
-            if (x > (screenWidth/25)*(i+3) && x < (screenWidth/25)*(i+4) && y > screenHeight*19/20 && y < screenHeight) {
-                desenhando = true;
-                objeto = i;
+        mouseX = x;
+        mouseY = screenHeight - y;
+        if (modo == 1) {
+            if (objeto == 1) {
+                add_ponto((Ponto){mouseX,mouseY}, pontos);
             }
+        } else if (modo == 0) {
+            ponto_selecionado = selecionar_ponto(mouseX, mouseY, pontos);
         }
-    }
-    */
-
-    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-        if (!pivotDefinido) {
-            // Primeiro clique: define o pivô
-            pivotX = x;
-            pivotY = screenHeight-y;
-            pivotDefinido = true;
-            desenhando = true;
-        } else {
-            // Segundo clique: desenha linha definitiva
-            desenhando = false;
-            glBegin(GL_LINES);
-                glVertex2f(pivotX, pivotY);
-                glVertex2f(mouseX, mouseY);
-            glEnd();
-            glFlush();
-            pivotDefinido = false; // Reseta para próximo desenho
-        }
+        glutPostRedisplay();
     }
 }
 
-// Callback de movimento do mouse com botão pressionado
+void keyboard(unsigned char key, int x, int y) {
+    switch (key) {
+        case '1':
+            objeto = 1; //ponto
+            break;
+        case '2':
+            objeto = 2; //linha
+            break;
+        case '3':
+            objeto = 3; //polígono
+            break;
+        case 's':
+            modo = 0; //selecionar
+            break;
+        case 'd':
+            modo = 1; //desenhar
+            break;
+        case 'r':
+            modo = -1; //nenhum
+            objeto = -1; //nenhum
+            break;
+        default:
+            objeto = -1; //nenhum
+            modo = -1; //nenhum
+    }
+
+}
+
+/* Callback de movimento do mouse com botão pressionado
 void motion(int x, int y) {
     if (desenhando) {
         mouseX = x;
@@ -93,64 +89,18 @@ void motion(int x, int y) {
         glutPostRedisplay(); // Re-renderiza
     }
 }
-
-void init() {
-    glClearColor(1.0, 1.0, 1.0, 0.0);
-
-    glMatrixMode(GL_PROJECTION);
-    gluOrtho2D(0.0, screenWidth, 0.0, screenHeight);
-}
+*/
 
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // Linha de pré-visualização
-    if (desenhando) {
-        glColor3f(1.0, 0.0, 0.0); // Vermelho
-        glBegin(GL_LINES);
-            glVertex2f(pivotX, pivotY);
-            glVertex2f(mouseX, mouseY);
-        glEnd();
-    }
+    glPointSize(5);
 
     glColor3f(0.0, 0.0, 0.0); // Preto
     glBegin(GL_LINES);
-        glVertex2f(0, screenHeight*19/20);
-        glVertex2f(screenWidth, screenHeight*19/20);
-        glVertex2f(0, screenHeight-1);
-        glVertex2f(screenWidth, screenHeight-1);
     glEnd();
 
-    for(int i=0; i<4; i++) {
-        glBegin(GL_LINES);
-            glVertex2f((screenWidth/25)*(i+3), screenHeight*19/20);
-            glVertex2f((screenWidth/25)*(i+3), screenHeight);
-        glEnd();
-
-        switch (i) {
-            case 0:
-                glBegin(GL_POINTS);
-                    glVertex2f((screenWidth/25)*(i+3.5), screenHeight*39/40);
-                glEnd();
-                break;
-            case 1:
-                glBegin(GL_LINES);
-                    glVertex2f((screenWidth/25)*(i+3.5)-screenWidth/100, screenHeight*39/40+screenWidth/100);
-                    glVertex2f((screenWidth/25)*(i+3.5)+screenWidth/100, screenHeight*39/40-screenWidth/100);
-                glEnd();
-                break;
-            case 2:
-                glBegin(GL_POLYGON);
-                    glVertex2f((screenWidth/25)*(i+3.5)-screenWidth/100, screenHeight*39/40+screenWidth/250);
-                    glVertex2f((screenWidth/25)*(i+3.5), screenHeight*39/40+screenWidth/100);
-                    glVertex2f((screenWidth/25)*(i+3.5)+screenWidth/100, screenHeight*39/40+screenWidth/250);
-                    glVertex2f((screenWidth/25)*(i+3.5)+screenWidth/150, screenHeight*39/40-screenWidth/100);
-                    glVertex2f((screenWidth/25)*(i+3.5)-screenWidth/150, screenHeight*39/40-screenWidth/100);
-                glEnd();
-            default:
-                break;
-        }
-    }
+    desenhar_pontos(pontos);
 
     glFlush();
 }
@@ -165,10 +115,12 @@ int main(int argc, char** argv) {
 
     glutDisplayFunc(display);
     glutMouseFunc(mouse);
-    glutMotionFunc(motion);
-    glutPassiveMotionFunc(motion);
+    glutKeyboardFunc(keyboard);
+    //glutMotionFunc(motion);
+    //glutPassiveMotionFunc(motion);
 
     glutMainLoop();
 
+    excluir_todos_pontos(pontos);
     return 0;
 }
