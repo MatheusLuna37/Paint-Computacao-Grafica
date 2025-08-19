@@ -1,13 +1,17 @@
-typedef struct PontoEl *Pontos;
-typedef struct Ponto Ponto;
+#ifndef PONTOS_H
+#define PONTOS_H
 
-typedef struct Ponto {
+typedef struct PontoEl {
     float x, y;
-} Ponto;
+    struct PontoEl *prox;
+} PontoEl;
 
-Pontos *inicializar_pontos();
-int add_ponto(Ponto ponto, Pontos *pontos);
+typedef PontoEl* Pontos;
+
+Pontos inicializar_pontos();
+void adicionar_ponto(Pontos *lista, float x, float y);
+int desenhar_pontos(Pontos lista);
+Pontos selecionar_ponto(float mouseX, float mouseY, Pontos lista);
 int excluir_todos_pontos(Pontos *pontos);
-int desenhar_pontos(pontos);
-Pontos selecionar_ponto_anterior(float mouseX, float mouseY, Pontos *pontos);
-Pontos selecionar_ponto(float mouseX, float mouseY, Pontos *pontos);
+
+#endif

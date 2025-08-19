@@ -1,49 +1,29 @@
-#include <stdio.h>
 #include <stdlib.h>
-#include <windows.h>
-#include <stdbool.h>
+// #include <windows.h>
 #include <GL/glut.h>
 #include "pontos.h"
 
-float TOLERANCIA = 0.2;
-
-typedef struct PontoEl {
-    Ponto ponto;
-    bool selecionado;
-    struct PontoEl *prox;
-} PontoEl;
-
-
-Pontos *inicializar_pontos() {
-    Pontos *pontos = (Pontos *) malloc(sizeof(Pontos));
-    *pontos = NULL;
-    return pontos;
+Pontos inicializar_pontos() {
+    return NULL;
 }
 
-int add_ponto(Ponto ponto, Pontos *pontos) {
-    if (pontos == NULL) return 0;
-    PontoEl *novo = (PontoEl *) malloc(sizeof(PontoEl));
-    if (novo == NULL) return 0;
-    novo->ponto = ponto;
-    novo->selecionado = false;
-    novo->prox = *pontos;
-    *pontos = novo;
-    return 1;
+void adicionar_ponto(Pontos *lista, float x, float y) {
+    PontoEl *novo = (PontoEl*)malloc(sizeof(PontoEl));
+    novo->x = x;
+    novo->y = y;
+    novo->prox = *lista;
+    *lista = novo;
 }
 
-int desenhar_pontos(Pontos *pontos) {
-    if (pontos == NULL) return 0;
-    PontoEl *aux = *pontos;
-    while (aux != NULL) {
-        if (aux->selecionado) {
-            glColor3f(0, 1, 0);
-        }
-        glBegin(GL_POINTS);
-            glVertex2f(aux->ponto.x, aux->ponto.y);
-        glEnd();
-        aux = aux->prox;
-        glColor3f(0, 0, 0);
+int desenhar_pontos(Pontos lista) {
+    PontoEl *p = lista;
+    glPointSize(5.0);
+    glBegin(GL_POINTS);
+    while (p != NULL) {
+        glVertex2f(p->x, p->y);
+        p = p->prox;
     }
+    glEnd();
     return 1;
 }
 
@@ -54,20 +34,16 @@ Caso contrário: retorna o ponteiro para o elemento anterior ao ponto selecionado
 
 modo: 0-> retorna ponteiro para o selecionado, 1-> retorna ponteiro para o anterior ao selecionado
 */
-Pontos selecionar_ponto(float mouseX, float mouseY, Pontos *pontos) {
-    if (pontos == NULL) return NULL;
-    PontoEl* buscador = *pontos;
-    PontoEl* anterior = *pontos;
-    while (buscador != NULL) {
-        if (buscador->ponto.x >= mouseX-TOLERANCIA && buscador->ponto.x <= mouseX+TOLERANCIA &&
-            buscador->ponto.y >= mouseY-TOLERANCIA && buscador->ponto.y <= mouseY+TOLERANCIA) {
-            buscador->selecionado = true;
-            break;
+Pontos selecionar_ponto(float mouseX, float mouseY, Pontos lista) {
+    PontoEl *p = lista;
+    while (p != NULL) {
+        if ((mouseX >= p->x - 0.05 && mouseX <= p->x + 0.05) &&
+            (mouseY >= p->y - 0.05 && mouseY <= p->y + 0.05)) {
+            return p;
         }
-        anterior = buscador;
-        buscador = buscador->prox;
+        p = p->prox;
     }
-    return anterior;
+    return NULL;
 }
 
 /*
