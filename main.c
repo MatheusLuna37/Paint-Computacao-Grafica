@@ -1,13 +1,28 @@
 #include <GL/glut.h>
+#include <stdlib.h>
 #include <stdbool.h>
-#include <stdio.h>
-#include <windows.h>
+#include <math.h>
+// #include <windows.h>
 #include "pontos.h"
+#include "linhas.h"
+#include "borracha.h"
+#include "poligonos.h"
 
+// Dimensões da tela
 int screenWidth = 1280;
 int screenHeight = 720;
 
-Pontos *pontos;
+// Instâncias de ponto, linha e polígono
+Pontos pontos;
+Pontos pontoSelecionado;
+Linhas linhas;
+Poligonos poligonos;
+PoligonoEl *poligonoAtual = NULL;
+
+// Para controle se é desenho de linha
+float startX, startY;
+int isDragging = 0;
+const float DRAG_THRESHOLD = 0.005f; // distância mínima para considerar arraste
 
 // Estado
 bool pivotDefinido = false;
@@ -29,28 +44,61 @@ int objeto = -1;
 float mouseX, mouseY;
 
 void init() {
-    glClearColor(1.0, 1.0, 1.0, 0.0);
-
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+    glColor3f(0.0, 0.0, 0.0);
+    glPointSize(5.0);
     glMatrixMode(GL_PROJECTION);
-    gluOrtho2D(0.0, screenWidth, 0.0, screenHeight);
+    gluOrtho2D(0.0, 1.0, 0.0, 1.0);
 
     pontos = inicializar_pontos();
+    linhas = inicializar_linhas();
+    poligonos = inicializar_poligonos();
+
 }
 
-// Callback de clique do mouse
 void mouse(int button, int state, int x, int y) {
-    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-        mouseX = x;
-        mouseY = screenHeight - y;
-        if (modo == 1) {
-            if (objeto == 1) {
-                add_ponto((Ponto){mouseX,mouseY}, pontos);
-            }
-        } else if (modo == 0) {
-            ponto_selecionado = selecionar_ponto(mouseX, mouseY, pontos);
+    float mouseX = (float)x / glutGet(GLUT_WINDOW_WIDTH);
+    float mouseY = 1.0f - (float)y / glutGet(GLUT_WINDOW_HEIGHT);
+
+    if (button == GLUT_LEFT_BUTTON) {
+        if (state == GLUT_DOWN) {
+            // Armazena posição inicial e marca que o botão foi pressionado
+            startX = mouseX;
+            startY = mouseY;
+            isDragging = 1;
         }
+        else if (state == GLUT_UP && isDragging) {
+            // Verifica distância do arraste
+            float dx = mouseX - startX;
+            float dy = mouseY - startY;
+            float dist = sqrtf(dx*dx + dy*dy);
+
+            if (dist < DRAG_THRESHOLD) {
+                // Clique rápido -> adiciona ponto
+                adicionar_ponto(&pontos, mouseX, mouseY);
+            } else {
+                // Arraste -> adiciona linha
+                adicionar_linha(&linhas, startX, startY, mouseX, mouseY);
+            }
+            isDragging = 0;
+        }
+    }
+    else if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN) {
+        pontoSelecionado = selecionar_ponto(mouseX, mouseY, pontos);
+    }
+
+    if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN) {
+        float mouseX = (float)x / glutGet(GLUT_WINDOW_WIDTH);
+        float mouseY = 1.0f - (float)y / glutGet(GLUT_WINDOW_HEIGHT);
+
+        apagar_ponto(&pontos, mouseX, mouseY, BORRACHA_TOLERANCIA);
+        apagar_linha(&linhas, mouseX, mouseY, BORRACHA_TOLERANCIA);
+
         glutPostRedisplay();
     }
+
+
+    glutPostRedisplay();
 }
 
 void keyboard(unsigned char key, int x, int y) {
@@ -81,29 +129,27 @@ void keyboard(unsigned char key, int x, int y) {
 
 }
 
-/* Callback de movimento do mouse com botão pressionado
-void motion(int x, int y) {
-    if (desenhando) {
-        mouseX = x;
-        mouseY = screenHeight-y;
-        glutPostRedisplay(); // Re-renderiza
-    }
-}
-*/
-
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     glPointSize(5);
-
     glColor3f(0.0, 0.0, 0.0); // Preto
-    glBegin(GL_LINES);
-    glEnd();
 
+    // Desenha linhas
+    glColor3f(1.0, 0.0, 0.0); // vermelho para linhas
+    desenhar_linhas(linhas);
+
+    // Desenha pontos
+    glColor3f(0.0, 0.0, 0.0); // preto para pontos
     desenhar_pontos(pontos);
+
+    // Desenha polígonos
+    glColor3f(0.0, 0.0, 1.0); // azul para polígonos
+    desenhar_poligonos(poligonos);
 
     glFlush();
 }
+
 
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
@@ -121,6 +167,7 @@ int main(int argc, char** argv) {
 
     glutMainLoop();
 
-    excluir_todos_pontos(pontos);
+    excluir_todos_pontos(&pontos);
+    excluir_todas_linhas(&linhas);
     return 0;
 }
