@@ -5,14 +5,13 @@
 #include <GL/glut.h>
 #include "pontos.h"
 
-float TOLERANCIA = 0.2;
+float TOLERANCIA = 2;
+Pontos SELECIONADO = NULL;
 
 typedef struct PontoEl {
     Ponto ponto;
-    bool selecionado;
     struct PontoEl *prox;
 } PontoEl;
-
 
 Pontos *inicializar_pontos() {
     Pontos *pontos = (Pontos *) malloc(sizeof(Pontos));
@@ -25,7 +24,6 @@ int add_ponto(Ponto ponto, Pontos *pontos) {
     PontoEl *novo = (PontoEl *) malloc(sizeof(PontoEl));
     if (novo == NULL) return 0;
     novo->ponto = ponto;
-    novo->selecionado = false;
     novo->prox = *pontos;
     *pontos = novo;
     return 1;
@@ -35,7 +33,7 @@ int desenhar_pontos(Pontos *pontos) {
     if (pontos == NULL) return 0;
     PontoEl *aux = *pontos;
     while (aux != NULL) {
-        if (aux->selecionado) {
+        if (aux == SELECIONADO) {
             glColor3f(0, 1, 0);
         }
         glBegin(GL_POINTS);
@@ -54,20 +52,46 @@ Caso contrário: retorna o ponteiro para o elemento anterior ao ponto selecionado
 
 modo: 0-> retorna ponteiro para o selecionado, 1-> retorna ponteiro para o anterior ao selecionado
 */
-Pontos selecionar_ponto(float mouseX, float mouseY, Pontos *pontos) {
-    if (pontos == NULL) return NULL;
+int selecionar_ponto(float mouseX, float mouseY, Pontos *pontos) {
+    if (pontos == NULL) return 0;
     PontoEl* buscador = *pontos;
-    PontoEl* anterior = *pontos;
     while (buscador != NULL) {
         if (buscador->ponto.x >= mouseX-TOLERANCIA && buscador->ponto.x <= mouseX+TOLERANCIA &&
             buscador->ponto.y >= mouseY-TOLERANCIA && buscador->ponto.y <= mouseY+TOLERANCIA) {
-            buscador->selecionado = true;
+            SELECIONADO = buscador;
             break;
         }
+        buscador = buscador->prox;
+    }
+
+    if (buscador == NULL) SELECIONADO = NULL;
+
+    return 1;
+}
+
+int excluir_ponto_selecionado(Pontos *pontos) {
+    if (pontos == NULL) return 0;
+    if (SELECIONADO == NULL) return 0;
+    if (SELECIONADO == *pontos) {
+        *pontos = SELECIONADO->prox;
+        free(SELECIONADO);
+        SELECIONADO = NULL;
+        return 1;
+    }
+    PontoEl *buscador = (*pontos)->prox;
+    PontoEl *anterior = *pontos;
+    while (buscador != NULL && buscador != SELECIONADO) {
         anterior = buscador;
         buscador = buscador->prox;
     }
-    return anterior;
+    if (buscador == NULL) {
+        SELECIONADO = NULL;
+        return 0;
+    }
+    anterior->prox = buscador->prox;
+    free(buscador);
+    SELECIONADO = NULL;
+    return 1;
 }
 
 /*

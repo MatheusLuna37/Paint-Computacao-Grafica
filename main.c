@@ -10,8 +10,8 @@ int screenHeight = 720;
 Pontos *pontos;
 
 // Estado
-bool pivotDefinido = false;
-Pontos ponto_selecionado = NULL;
+bool DESENHANDO_LINHA = false;
+bool DESENHANDO_POLIGONO = false;
 int modo = -1;
 /*
 -1: nenhum
@@ -25,6 +25,7 @@ int objeto = -1;
 2: linha
 3: polígono
 */
+int action = -1;
 
 float mouseX, mouseY;
 
@@ -45,12 +46,22 @@ void mouse(int button, int state, int x, int y) {
         if (modo == 1) {
             if (objeto == 1) {
                 add_ponto((Ponto){mouseX,mouseY}, pontos);
+            } else if (objeto == 2) {
+                if (!DESENHANDO_LINHA) {
+                    DESENHANDO_LINHA = true;
+                } else {
+                    DESENHANDO_LINHA = false;
+                }
             }
         } else if (modo == 0) {
-            ponto_selecionado = selecionar_ponto(mouseX, mouseY, pontos);
+            if (selecionar_ponto(mouseX, mouseY, pontos));
         }
         glutPostRedisplay();
     }
+}
+
+void motion(int button, int state, int x, int y) {
+
 }
 
 void keyboard(unsigned char key, int x, int y) {
@@ -70,10 +81,26 @@ void keyboard(unsigned char key, int x, int y) {
         case 'd':
             modo = 1; //desenhar
             break;
-        case 'r':
-            modo = -1; //nenhum
-            objeto = -1; //nenhum
+        case 'x':
+            if (excluir_ponto_selecionado(pontos));
+            glutPostRedisplay();
             break;
+        case 't':
+            action = 2;
+            break;
+        case 'e':
+            action = 3;
+            break;
+        case 'r':
+            action = 4;
+            break;
+        case 'c':
+            action = 5;
+            break;
+        case 'p':
+            modo = -1;
+            objeto = -1;
+            action = -1;
         default:
             objeto = -1; //nenhum
             modo = -1; //nenhum
@@ -101,6 +128,10 @@ void display() {
     glEnd();
 
     desenhar_pontos(pontos);
+
+    if (DESENHANDO_LINHA) {
+        desenhar_linha_preview();
+    }
 
     glFlush();
 }

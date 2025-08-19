@@ -34,9 +34,17 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Unit filename="linha.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="linha.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="poligono.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="poligono.h" />
 		<Unit filename="pontos.c">
 			<Option compilerVar="CC" />
 		</Unit>
