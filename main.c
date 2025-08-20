@@ -3,15 +3,17 @@
 #include <stdio.h>
 #include <windows.h>
 #include "pontos.h"
+#include "linhas.h"
+#include "poligonos.h"
 
 int screenWidth = 1280;
 int screenHeight = 720;
 
 Pontos *pontos;
+Linhas *linhas;
+Poligonos *poligonos;
 
 // Estado
-bool DESENHANDO_LINHA = false;
-bool DESENHANDO_POLIGONO = false;
 int modo = -1;
 /*
 -1: nenhum
@@ -36,6 +38,8 @@ void init() {
     gluOrtho2D(0.0, screenWidth, 0.0, screenHeight);
 
     pontos = inicializar_pontos();
+    linhas = inicializar_linhas();
+    poligonos = inicializar_poligonos();
 }
 
 // Callback de clique do mouse
@@ -47,21 +51,30 @@ void mouse(int button, int state, int x, int y) {
             if (objeto == 1) {
                 add_ponto((Ponto){mouseX,mouseY}, pontos);
             } else if (objeto == 2) {
-                if (!DESENHANDO_LINHA) {
-                    DESENHANDO_LINHA = true;
-                } else {
-                    DESENHANDO_LINHA = false;
-                }
+                criar_linha(mouseX, mouseY, linhas);
+            } else if (objeto == 3) {
+                add_vertice_poligono_atual(mouseX, mouseY, poligonos);
             }
         } else if (modo == 0) {
-            if (selecionar_ponto(mouseX, mouseY, pontos));
+            if (selecionar_ponto(mouseX, mouseY, pontos)){}
+            else if (selecionar_linha(mouseX, mouseY, linhas)) {}
+            else if (selecionar_poligono(mouseX, mouseY, poligonos)) {}
         }
         glutPostRedisplay();
     }
+    if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN) {
+        if (modo == 1) {
+            if (objeto == 3) {
+                if (cancelar_poligono_atual());
+            }
+        }
+    }
 }
 
-void motion(int button, int state, int x, int y) {
-
+void motion(int x, int y) {
+    mouseX = x;
+    mouseY = screenHeight - y;
+    glutPostRedisplay();
 }
 
 void keyboard(unsigned char key, int x, int y) {
@@ -83,6 +96,8 @@ void keyboard(unsigned char key, int x, int y) {
             break;
         case 'x':
             if (excluir_ponto_selecionado(pontos));
+            if (excluir_linha_selecionada(linhas));
+            if (excluir_poligono_selecionado(poligonos));
             glutPostRedisplay();
             break;
         case 't':
@@ -108,16 +123,6 @@ void keyboard(unsigned char key, int x, int y) {
 
 }
 
-/* Callback de movimento do mouse com botão pressionado
-void motion(int x, int y) {
-    if (desenhando) {
-        mouseX = x;
-        mouseY = screenHeight-y;
-        glutPostRedisplay(); // Re-renderiza
-    }
-}
-*/
-
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -128,10 +133,11 @@ void display() {
     glEnd();
 
     desenhar_pontos(pontos);
+    desenhar_linhas(linhas);
+    desenhar_poligonos(poligonos);
 
-    if (DESENHANDO_LINHA) {
-        desenhar_linha_preview();
-    }
+    if (desenhar_previa_linha(mouseX, mouseY, linhas));
+    if (desenhar_previa_poligono(mouseX, mouseY));
 
     glFlush();
 }
@@ -147,11 +153,13 @@ int main(int argc, char** argv) {
     glutDisplayFunc(display);
     glutMouseFunc(mouse);
     glutKeyboardFunc(keyboard);
-    //glutMotionFunc(motion);
-    //glutPassiveMotionFunc(motion);
+    glutMotionFunc(motion);
+    glutPassiveMotionFunc(motion);
 
     glutMainLoop();
 
     excluir_todos_pontos(pontos);
+    excluir_todas_linhas(linhas);
+    excluir_todos_poligonos(poligonos);
     return 0;
 }

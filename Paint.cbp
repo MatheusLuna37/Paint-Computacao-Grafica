@@ -34,10 +34,10 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
-		<Unit filename="linha.c">
+		<Unit filename="linhas.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="linha.h" />
+		<Unit filename="linhas.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>

@@ -4,9 +4,10 @@
 #include <stdbool.h>
 #include <GL/glut.h>
 #include "pontos.h"
+#include "linhas.h"
 
-float TOLERANCIA = 2;
-Pontos SELECIONADO = NULL;
+static float TOLERANCIA = 2;
+static Pontos SELECIONADO = NULL;
 
 typedef struct PontoEl {
     Ponto ponto;
@@ -29,6 +30,52 @@ int add_ponto(Ponto ponto, Pontos *pontos) {
     return 1;
 }
 
+int contar_arestas_atingidas (float mouseX, float mouseY, Pontos *pontos) {
+    if (pontos == NULL || *pontos == NULL) return -1;
+    int count = 0;
+    PontoEl *aux = *pontos;
+    Ponto p1, p2;
+    float xi;
+    while (aux != NULL) {
+        p1 = aux->ponto;
+        if (aux->prox != NULL) {
+            p2 = aux->prox->ponto;
+        } else {
+            if (aux != *pontos) {
+                p2 = (*pontos)->ponto;
+            } else {
+                return -1;
+            }
+        }
+        if (!((p1.y > mouseY && p2.y > mouseY)
+                     || (p1.y < mouseY && p2.y < mouseY)
+                     || (p1.x < mouseX && p2.x < mouseX))){
+            if ((p1.x > mouseX && p2.x > mouseX) && ((mouseY-p1.y)*(mouseY-p2.y) < 0)) {
+                count += 1;
+            } else {
+                if (p1.y != p2.y) {
+                    xi = p1.x + (mouseY-p1.y)*(p2.x-p1.x)/(p2.y-p1.y);
+                    if (xi > mouseX && xi != p2.x) {
+                        count += 1;
+                    }
+                }
+            }
+        }
+        aux = aux->prox;
+    }
+    return count;
+}
+
+int converter_vertices(Pontos *pontos) {
+    if (pontos == NULL) return 0;
+    PontoEl *aux = *pontos;
+    while (aux != NULL) {
+        glVertex2f(aux->ponto.x, aux->ponto.y);
+        aux = aux->prox;
+    }
+    return 1;
+}
+
 int desenhar_pontos(Pontos *pontos) {
     if (pontos == NULL) return 0;
     PontoEl *aux = *pontos;
@@ -45,13 +92,6 @@ int desenhar_pontos(Pontos *pontos) {
     return 1;
 }
 
-/*
-NULL: não conseguiu selecionar nenhum ponto;
-Caso contrário: retorna o ponteiro para o elemento anterior ao ponto selecionado, exceto se foi encontrado na primeira posição;
-(Para utilizar esse método, devemos sempre verificar primeiro se retorna NULL ou se anterior->prox = NULL);
-
-modo: 0-> retorna ponteiro para o selecionado, 1-> retorna ponteiro para o anterior ao selecionado
-*/
 int selecionar_ponto(float mouseX, float mouseY, Pontos *pontos) {
     if (pontos == NULL) return 0;
     PontoEl* buscador = *pontos;
@@ -59,14 +99,14 @@ int selecionar_ponto(float mouseX, float mouseY, Pontos *pontos) {
         if (buscador->ponto.x >= mouseX-TOLERANCIA && buscador->ponto.x <= mouseX+TOLERANCIA &&
             buscador->ponto.y >= mouseY-TOLERANCIA && buscador->ponto.y <= mouseY+TOLERANCIA) {
             SELECIONADO = buscador;
-            break;
+            return 1;
         }
         buscador = buscador->prox;
     }
 
-    if (buscador == NULL) SELECIONADO = NULL;
+    SELECIONADO = NULL;
 
-    return 1;
+    return 0;
 }
 
 int excluir_ponto_selecionado(Pontos *pontos) {
@@ -93,13 +133,6 @@ int excluir_ponto_selecionado(Pontos *pontos) {
     SELECIONADO = NULL;
     return 1;
 }
-
-/*
-int teste_selecionar_ponto(float mouse_x, float mouse_y, Pontos *pontos) {
-    PontoEl *resultado = selecionar_ponto(mouse_x, mouse_y, pontos);
-    if (resultado == NULL) return 0;
-    return 1;
-}*/
 
 int excluir_todos_pontos(Pontos *pontos) {
     if (pontos == NULL) return 0;
