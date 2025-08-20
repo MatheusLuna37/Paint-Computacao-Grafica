@@ -19,5 +19,8 @@ int criar_linha(float mouseX, float mouseY, Linhas *linhas);
 int desenhar_previa_linha(float mouseX, float mouseY, Linhas *linhas);
 int selecionar_linha(float mouseX, float mouseY, Linhas *linhas);
 unsigned int codificador(Ponto p, float xmin, float xmax, float ymin, float ymax);
+int transladar_selecionada(float mouseX, float mouseY);
+void iniciar_translado_linha(mouseX, mouseY);
+void parar_translado_linha();
 
 #endif

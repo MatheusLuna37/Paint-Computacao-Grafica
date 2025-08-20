@@ -3,11 +3,17 @@
 #include <windows.h>
 #include <stdbool.h>
 #include <GL/glut.h>
+#include <math.h>
 #include "pontos.h"
 #include "linhas.h"
+#include "matrizes.h"
 
 static float TOLERANCIA = 2;
 static Pontos SELECIONADO = NULL;
+static int transladando = 0;
+static int rotacionando = 0;
+static float prevMouseX, prevMouseY;
+static float curMouseX, curMouseY;
 
 typedef struct PontoEl {
     Ponto ponto;
@@ -107,6 +113,122 @@ int selecionar_ponto(float mouseX, float mouseY, Pontos *pontos) {
     SELECIONADO = NULL;
 
     return 0;
+}
+
+float **matriz_translacao(float tx, float ty) {
+    float **mat = alocar_matriz(3, 3);
+    if (mat == NULL) {
+        return NULL;
+    }
+    mat[0][0] = 1; mat[0][1] = 0; mat[0][2] = tx;
+    mat[1][0] = 0; mat[1][1] = 1; mat[1][2] = ty;
+    mat[2][0] = 0; mat[2][1] = 0; mat[2][2] = 1;
+
+    return mat;
+}
+
+float **matriz_escala(float sx, float sy) {
+    float **mat = alocar_matriz(3, 3);
+    if (mat == NULL) {
+        return NULL;
+    }
+    mat[0][0] = sx; mat[0][1] = 0; mat[0][2] = 0;
+    mat[1][0] = 0; mat[1][1] = sy; mat[1][2] = 0;
+    mat[2][0] = 0; mat[2][1] = 0; mat[2][2] = 1;
+
+    return mat;
+}
+
+float **matriz_rotacao(float s, float c) {
+    float **mat = alocar_matriz(3, 3);
+    if (mat == NULL) {
+        return NULL;
+    }
+    mat[0][0] = c; mat[0][1] = -s; mat[0][2] = 0;
+    mat[1][0] = s; mat[1][1] = c; mat[1][2] = 0;
+    mat[2][0] = 0; mat[2][1] = 0; mat[2][2] = 1;
+
+    return mat;
+}
+
+float **matriz_cisalhamento(float sh) {
+    float **mat = alocar_matriz(3, 3);
+    if (mat == NULL) {
+        return NULL;
+    }
+    mat[0][0] = 1; mat[0][1] = sh; mat[0][2] = 0;
+    mat[1][0] = 0; mat[1][1] = 1; mat[1][2] = 0;
+    mat[2][0] = 0; mat[2][1] = 0; mat[2][2] = 1;
+
+    return mat;
+}
+
+float **ponto_homogeneo(Ponto p) {
+    float **mat = alocar_matriz(3, 1);
+    if (mat == NULL) {
+        return NULL;
+    }
+    mat[0][0] = p.x;
+    mat[1][0] = p.y;
+    mat[2][0] = 1;
+
+    return mat;
+}
+
+void iniciar_translado() {
+    transladando = 1;
+}
+
+void parar_translado() {
+    transladando = 0;
+}
+
+void iniciar_rotacao(float mouseX, float mouseY) {
+    rotacionando = 1;
+}
+
+void parar_rotacao(float mouseX, float mouseY) {
+    rotacionando = 0;
+}
+
+int transladar_selecionado(float mouseX, float mouseY) {
+    if (SELECIONADO == NULL || !transladando) return 0;
+    float **mat_t = matriz_translacao(mouseX-SELECIONADO->ponto.x, mouseY-SELECIONADO->ponto.y);
+    float **mat_p = ponto_homogeneo(SELECIONADO->ponto);
+    float **resultado = multiplicar_matrizes(mat_t, 3, 3,
+                                       mat_p, 3, 1);
+    liberar_matriz(mat_t, 3);
+    liberar_matriz(mat_p, 3);
+
+    SELECIONADO->ponto.x = resultado[0][0];
+    SELECIONADO->ponto.y = resultado[1][0];
+
+    liberar_matriz(resultado, 3);
+    return 1;
+}
+
+int rotacionar_selecionado(float mouseX, float mouseY) {
+    if (SELECIONADO == NULL || !rotacionando) return 0;
+    float x = SELECIONADO->ponto.x, y = SELECIONADO->ponto.y;
+    float dot   = mouseX * x + mouseY * y;
+    float cross = -mouseX * y + mouseY * x;
+    float norm_u = sqrtf(mouseX*mouseX + mouseY*mouseY);
+    float norm_v = sqrtf(x*x + y*y);
+
+    float cos_theta = dot / (norm_u * norm_v);
+    float sin_theta = cross / (norm_u * norm_v);
+    float **mat_r = matriz_rotacao(sin_theta, cos_theta);
+    float **mat_p = ponto_homogeneo(SELECIONADO->ponto);
+    float **resultado = multiplicar_matrizes(mat_r, 3, 3,
+                                       mat_p, 3, 1);
+    liberar_matriz(mat_r, 3);
+    liberar_matriz(mat_p, 3);
+
+    SELECIONADO->ponto.x = resultado[0][0];
+    SELECIONADO->ponto.y = resultado[1][0];
+
+    liberar_matriz(resultado, 3);
+    return 1;
 }
 
 int excluir_ponto_selecionado(Pontos *pontos) {

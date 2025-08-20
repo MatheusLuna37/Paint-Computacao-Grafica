@@ -15,5 +15,11 @@ int selecionar_ponto(float mouseX, float mouseY, Pontos *pontos);
 int excluir_ponto_selecionado(Pontos *pontos);
 int converter_vertices(Pontos *pontos);
 int contar_arestas_atingidas (float mouseX, float mouseY, Pontos *pontos);
+int transladar_selecionado(float mouseX, float mouseY);
+void iniciar_translado();
+void parar_translado();
+int rotacionar_selecionado(float mouseX, float mouseY);
+void iniciar_rotacao(float mouseX, float mouseY);
+void parar_rotacao(float mouseX, float mouseY);
 
 #endif

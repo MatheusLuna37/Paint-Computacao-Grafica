@@ -56,11 +56,25 @@ void mouse(int button, int state, int x, int y) {
                 add_vertice_poligono_atual(mouseX, mouseY, poligonos);
             }
         } else if (modo == 0) {
-            if (selecionar_ponto(mouseX, mouseY, pontos)){}
+            if (selecionar_ponto(mouseX, mouseY, pontos)) {}
             else if (selecionar_linha(mouseX, mouseY, linhas)) {}
             else if (selecionar_poligono(mouseX, mouseY, poligonos)) {}
+            if (action == 2) {
+                parar_rotacao(mouseX, mouseY);
+                iniciar_translado();
+                iniciar_translado_linha(mouseX, mouseY);
+            } else if (action == 4) {
+                parar_translado();
+                iniciar_rotacao(mouseX, mouseY);
+                parar_translado_linha();
+            }
         }
         glutPostRedisplay();
+    }
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
+        parar_translado();
+        parar_rotacao(mouseX, mouseY);
+        parar_translado_linha();
     }
     if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN) {
         if (modo == 1) {
@@ -74,6 +88,11 @@ void mouse(int button, int state, int x, int y) {
 void motion(int x, int y) {
     mouseX = x;
     mouseY = screenHeight - y;
+
+    if (transladar_selecionado(mouseX, mouseY));
+    if (rotacionar_selecionado(mouseX, mouseY));
+    if (transladar_selecionada(mouseX, mouseY));
+
     glutPostRedisplay();
 }
 

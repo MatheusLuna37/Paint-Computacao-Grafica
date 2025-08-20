@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1755698577 source:c:\users\samsung\documents\paint\main.c
+1755720470 source:c:\users\samsung\documents\paint\main.c
 	<GL/glut.h>
 	<stdbool.h>
 	<stdio.h>
@@ -8,16 +8,18 @@
 	"linhas.h"
 	"poligonos.h"
 
-1755699511 source:c:\users\samsung\documents\paint\pontos.c
+1755720021 source:c:\users\samsung\documents\paint\pontos.c
 	<stdio.h>
 	<stdlib.h>
 	<windows.h>
 	<stdbool.h>
 	<GL/glut.h>
+	<math.h>
 	"pontos.h"
 	"linhas.h"
+	"matrizes.h"
 
-1755698566 c:\users\samsung\documents\paint\pontos.h
+1755717733 c:\users\samsung\documents\paint\pontos.h
 
 1755612325 source:c:\users\samsung\documents\paint\linha.c
 	<stdio.h>
@@ -29,16 +31,17 @@
 
 1755634738 source:c:\users\samsung\documents\paint\poligono.c
 
-1755698566 c:\users\samsung\documents\paint\linhas.h
+1755720470 c:\users\samsung\documents\paint\linhas.h
 	"pontos.h"
 
-1755698566 source:c:\users\samsung\documents\paint\linhas.c
+1755720619 source:c:\users\samsung\documents\paint\linhas.c
 	<stdio.h>
 	<stdlib.h>
 	<windows.h>
 	<stdbool.h>
 	<GL/glut.h>
 	"linhas.h"
+	"matrizes.h"
 
 1755694333 c:\users\samsung\documents\paint\poligonos.h
 	"pontos.h"
@@ -50,4 +53,10 @@
 	<stdbool.h>
 	<GL/glut.h>
 	"poligonos.h"
+
+1755711874 source:c:\users\samsung\documents\paint\matrizes.c
+	<stdio.h>
+	<stdlib.h>
+
+1755711875 c:\users\samsung\documents\paint\matrizes.h
 

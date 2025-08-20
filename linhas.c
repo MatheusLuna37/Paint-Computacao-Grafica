@@ -3,12 +3,16 @@
 #include <windows.h>
 #include <stdbool.h>
 #include <GL/glut.h>
+#include "pontos.h"
 #include "linhas.h"
+#include "matrizes.h"
 
 static Linhas SELECIONADA = NULL;
 static Ponto PIVO = {0,0};
 static float TOLERANCIA = 10;
 static int desenhando = 0;
+static int transladando = 0;
+static float prevMouseX = -1, prevMouseY = -1;
 
 typedef struct LinhaEl {
     Linha linha;
@@ -49,6 +53,47 @@ int desenhar_previa_linha(float mouseX, float mouseY, Linhas *linhas) {
         glVertex2f(mouseX, mouseY);
     glEnd();
     glutPostRedisplay();
+    return 1;
+}
+
+void iniciar_translado_linha(mouseX, mouseY) {
+    transladando = 1;
+}
+
+void parar_translado_linha() {
+    transladando = 0;
+}
+
+int transladar_selecionada(float mouseX, float mouseY) {
+    if (SELECIONADA == NULL || !transladando) return 0;
+    if (prevMouseX == -1 && prevMouseY == -1) {
+        prevMouseX = mouseX;
+        prevMouseY = mouseY;
+        return 0;
+    }
+
+    printf("deltaX: %f (mouse: %f, prev: %f)\n", mouseX - prevMouseX, mouseX, prevMouseX);
+    float **mat_t = matriz_translacao(mouseX-prevMouseX, mouseY-prevMouseY);
+    float **mat_p1 = ponto_homogeneo((Ponto){SELECIONADA->linha.p1.x, SELECIONADA->linha.p1.y});
+    float **mat_p2 = ponto_homogeneo((Ponto){SELECIONADA->linha.p2.x, SELECIONADA->linha.p2.y});
+    float **resultado1 = multiplicar_matrizes(mat_t, 3, 3,
+                                              mat_p1, 3, 1);
+    float **resultado2 = multiplicar_matrizes(mat_t, 3, 3,
+                                              mat_p2, 3, 1);
+    liberar_matriz(mat_t, 3);
+    liberar_matriz(mat_p1, 3);
+    liberar_matriz(mat_p2, 3);
+
+    SELECIONADA->linha.p1.x = resultado1[0][0];
+    SELECIONADA->linha.p1.y = resultado1[1][0];
+    SELECIONADA->linha.p2.x = resultado2[0][0];
+    SELECIONADA->linha.p2.y = resultado2[1][0];
+
+    liberar_matriz(resultado1, 3);
+    liberar_matriz(resultado2, 3);
+
+    prevMouseX = mouseX;
+    prevMouseY = mouseY;
     return 1;
 }
 
