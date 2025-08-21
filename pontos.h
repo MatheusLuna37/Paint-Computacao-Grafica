@@ -25,7 +25,7 @@ int desenhar_pontos(Pontos *pontos);
 // Transformações
 Ponto calcular_centroide(int qtd, Pontos ponto_inicial);
 int transformar_pontos(float **mat, int qtd, Pontos ponto_inicial);
-Ponto vetor_ponto_centroide(Pontos *pontos, float xm, float ym);
+Ponto vetor_ponto_centroide(Pontos ponto, float xm, float ym);
 
 // Seleção e reset
 void resetar_ponto_selecionado();

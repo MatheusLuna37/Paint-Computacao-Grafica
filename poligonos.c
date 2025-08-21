@@ -39,7 +39,7 @@ int add_poligono(Poligono poligono, Poligonos *poligonos) {
 
 Pontos get_poligono_pontos() {
     if (POLIGONO_SELECIONADO == NULL) return NULL;
-    return POLIGONO_SELECIONADO->poligono.pontos;
+    return *(POLIGONO_SELECIONADO->poligono.pontos);
 }
 
 int add_vertice_poligono_atual(float mouseX, float mouseY, Poligonos *poligonos) {
@@ -121,7 +121,7 @@ int desenhar_poligonos(Poligonos *poligonos) {
 }
 
 void resetar_poligono_selecionado() {
-    POLIGONO_SELECIONADO = 0;
+    POLIGONO_SELECIONADO = NULL;
 }
 
 int selecionar_poligono(float mouseX, float mouseY, Poligonos *poligonos) {

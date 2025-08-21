@@ -44,13 +44,8 @@ void multiplicar_matrizes(float **Resultado,
                           float** matrizA, int linhasA, int colunasA,
                           float** matrizB, int linhasB, int colunasB) {
 
-    if (colunasA != linhasB) {
-            Resultado = NULL;
-    }
-
-    if (Resultado == NULL) {
-        return;
-    }
+    if (colunasA != linhasB) return;
+    if (Resultado == NULL) return;
 
     int linhasR = linhasA;
     int colunasR = colunasB;

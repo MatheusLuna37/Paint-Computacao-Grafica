@@ -38,12 +38,12 @@ int add_linha(Linha linha, Linhas *linhas) {
 }
 
 void resetar_linha_selecionada() {
-    LINHA_SELECIONADA = 0;
+    LINHA_SELECIONADA = NULL;
 }
 
 Pontos get_linha_pontos() {
     if (LINHA_SELECIONADA == NULL) return NULL;
-    return LINHA_SELECIONADA->linha.pontos;
+    return *(LINHA_SELECIONADA->linha.pontos);
 }
 
 int criar_linha(float mouseX, float mouseY, Linhas *linhas) {
@@ -92,27 +92,12 @@ int desenhar_linhas(Linhas *linhas) {
     return 1;
 }
 
-unsigned int codificador(Ponto p, float xmin, float xmax, float ymin, float ymax) {
-    unsigned int codigo = 0b0000;
-    if (p.x < xmin) {
-        codigo |= 0b1000;
-    } else if (p.x > xmax) {
-        codigo |= 0b0100;
-    }
-    if (p.y < ymin) {
-        codigo |= 0b0010;
-    } else if (p.y > ymax) {
-        codigo |= 0b0001;
-    }
-    return codigo;
-}
-
 int selecionar_linha(float mouseX, float mouseY, Linhas *linhas) {
     if (linhas == NULL) return 0;
     float xmin = mouseX-TOLERANCIA, ymin = mouseY-TOLERANCIA, xmax = mouseX+TOLERANCIA, ymax = mouseY+TOLERANCIA;
     LinhaEl* buscador = *linhas;
     while (buscador != NULL) {
-        if(avaliador_de_linha((*(buscador->linha.pontos)), xmin, xmax, ymin, ymax)) {
+        if(avaliador_de_linha(*(buscador->linha.pontos), xmin, xmax, ymin, ymax)) {
             LINHA_SELECIONADA = buscador;
             return 1;
         }

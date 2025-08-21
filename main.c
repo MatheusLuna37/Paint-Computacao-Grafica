@@ -92,7 +92,7 @@ void mouse(int button, int state, int x, int y) {
                 add_vertice_poligono_atual(mouseX, mouseY, poligonos);
             }
         } else if (modo == 0) {
-            objeto = selecionar_objeto(mouseX, mouseY, pontos, linhas, poligonos, SELECIONADO);
+            objeto = selecionar_objeto(mouseX, mouseY, pontos, linhas, poligonos, &SELECIONADO);
         }
         glutPostRedisplay();
     }
@@ -114,8 +114,8 @@ void motion(int x, int y) {
     mouseX = x;
     mouseY = screenHeight - y;
 
-    if (modo == 0) {
-        aplicar_transformacao(action, objeto, esquerdo, mouseX, mouseY, 0, SELECIONADO);
+    if (modo == 0 && (action == 2 || action == 4) && esquerdo) {
+        aplicar_transformacao(action, objeto, mouseX, mouseY, 0, SELECIONADO);
     }
 
     glutPostRedisplay();
@@ -123,8 +123,8 @@ void motion(int x, int y) {
 
 void wheel(int button, int direction, int x, int y) {
     dir = direction;
-    if (action == 3) {
-        aplicar_transformacao(action, objeto, esquerdo, mouseX, mouseY, dir, SELECIONADO);
+    if (action == 3 || action == 6) {
+        aplicar_transformacao(action, objeto, mouseX, mouseY, dir, SELECIONADO);
     }
     glutPostRedisplay();
 }
@@ -142,9 +142,12 @@ void keyboard(unsigned char key, int x, int y) {
             break;
         case 's':
             modo = 0; //selecionar
+            objeto = -1;
+            action = -1;
             break;
         case 'd':
             modo = 1; //desenhar
+            action = -1;
             break;
         case 'x':
             if (excluir_ponto_selecionado(pontos));
@@ -162,8 +165,9 @@ void keyboard(unsigned char key, int x, int y) {
             action = 4;
             break;
         case 'i':
-            action == 5;
-            aplicar_transformacao(action, objeto, esquerdo, mouseX, mouseY, 0, SELECIONADO);
+            action = 5;
+            aplicar_transformacao(action, objeto, mouseX, mouseY, 0, SELECIONADO);
+            glutPostRedisplay();
             break;
         case 'c':
             action = 6;
@@ -175,6 +179,7 @@ void keyboard(unsigned char key, int x, int y) {
         default:
             objeto = -1; //nenhum
             modo = -1; //nenhum
+            action = -1;
     }
 
 }

@@ -47,6 +47,21 @@ int avaliador_de_linha(Pontos ponto_inicial, float xmin, float xmax, float ymin,
     return avaliar_linha(p1, p2, xmin, xmax, ymin, ymax);
 }
 
+unsigned int codificador(Ponto p, float xmin, float xmax, float ymin, float ymax) {
+    unsigned int codigo = 0b0000;
+    if (p.x < xmin) {
+        codigo |= 0b1000;
+    } else if (p.x > xmax) {
+        codigo |= 0b0100;
+    }
+    if (p.y < ymin) {
+        codigo |= 0b0010;
+    } else if (p.y > ymax) {
+        codigo |= 0b0001;
+    }
+    return codigo;
+}
+
 int avaliar_linha(Ponto p1, Ponto p2, float xmin, float xmax, float ymin, float ymax) {
     unsigned int codigo1, codigo2, and_codigos, esq, dir, ab, ac;
     codigo1 = codificador(p1, xmin, xmax, ymin, ymax);
@@ -135,7 +150,7 @@ int desenhar_pontos(Pontos *pontos) {
 }
 
 Ponto calcular_centroide(int qtd, Pontos ponto_inicial) {
-    if (ponto_inicial == NULL) return (Ponto){-1, -1};
+    if (ponto_inicial == NULL) {printf("pronto"); return (Ponto){-1, -1};}
     float xm = 0, ym = 0;
     int count = 0;
     int count_aux = 0;
@@ -169,13 +184,13 @@ int transformar_pontos(float **mat, int qtd, Pontos ponto_inicial) {
     return 1;
 }
 
-Ponto vetor_ponto_centroide(Pontos *pontos, float xm, float ym) {
-    float x = (*pontos)->ponto.x, y = (*pontos)->ponto.y;
+Ponto vetor_ponto_centroide(Pontos ponto, float xm, float ym) {
+    float x = ponto->ponto.x, y = ponto->ponto.y;
     return (Ponto){x-xm,y-ym};
 }
 
 void resetar_ponto_selecionado() {
-    PONTO_SELECIONADO = 0;
+    PONTO_SELECIONADO = NULL;
 }
 
 int selecionar_ponto(float mouseX, float mouseY, Pontos *pontos) {
