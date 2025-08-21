@@ -34,15 +34,37 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Unit filename="globais.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="globais.h">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="linhas.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="linhas.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="matrizes.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="matrizes.h" />
+		<Unit filename="poligonos.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="poligonos.h" />
 		<Unit filename="pontos.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="pontos.h">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
+		<Unit filename="transformar.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="transformar.h" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>
