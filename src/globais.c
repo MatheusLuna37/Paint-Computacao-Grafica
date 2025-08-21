@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "globais.h"
+#include "../cabecalhos/globais.h"
 
 float **TRANSLACAO = NULL;
 float **ROTACAO = NULL;

@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <windows.h>
+//#include <windows.h>
 #include <stdbool.h>
 #include <GL/glut.h>
 #include <math.h>
-#include "pontos.h"
-#include "linhas.h"
-#include "matrizes.h"
+#include "../../cabecalhos/pontos.h"
+#include "../../cabecalhos/linhas.h"
+#include "../../cabecalhos/matrizes.h"
 
 static Linhas LINHA_SELECIONADA = NULL;
 static Ponto PIVO = {0,0};

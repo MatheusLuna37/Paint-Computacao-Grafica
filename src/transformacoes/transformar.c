@@ -1,12 +1,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "pontos.h"
-#include "linhas.h"
-#include "poligonos.h"
-#include "matrizes.h"
-#include "globais.h"
-#include "transformar.h"
+#include "../../cabecalhos/pontos.h"
+#include "../../cabecalhos/linhas.h"
+#include "../../cabecalhos/poligonos.h"
+#include "../../cabecalhos/matrizes.h"
+#include "../../cabecalhos/globais.h"
+#include "../../cabecalhos/transformar.h"
 
 int selecionar_objeto(float mouseX, float mouseY, Pontos *pontos, Linhas *linhas, Poligonos *poligonos, Pontos *SELECIONADO) {
     *SELECIONADO = NULL;
@@ -37,7 +37,7 @@ int aplicar_transformacao(int action, int objeto, float mouseX, float mouseY, in
     if (objeto == 3) qtd = -1;
 
     Ponto centroide = calcular_centroide(qtd, ponto_inicial);
-    if (centroide.x == -1 && centroide.y == -1) {printf("não passei"); return 0;}
+    if (centroide.x == -1 && centroide.y == -1) {printf("nï¿½o passei"); return 0;}
     float **mat;
     matriz_translacao(TRANSLACAO, 0, 0);
     mat = TRANSLACAO;
@@ -89,7 +89,7 @@ int aplicar_transformacao(int action, int objeto, float mouseX, float mouseY, in
         mat = CISALHAMENTO_CENTROIDE;
     }
 
-    printf("quase lá");
+    printf("quase lï¿½");
     transformar_pontos(mat, qtd, ponto_inicial);
 
     return 1;

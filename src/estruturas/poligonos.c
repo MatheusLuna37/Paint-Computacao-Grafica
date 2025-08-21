@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <windows.h>
+//#include <windows.h>
 #include <stdbool.h>
 #include <GL/glut.h>
-#include "poligonos.h"
+#include "../../cabecalhos/poligonos.h"
 
 typedef struct PoligonoEl {
     Poligono poligono;

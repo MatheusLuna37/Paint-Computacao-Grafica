@@ -2,12 +2,13 @@
 #include <GL/freeglut.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <windows.h>
-#include "pontos.h"
-#include "linhas.h"
-#include "poligonos.h"
-#include "globais.h"
-#include "transformar.h"
+//#include <windows.h>
+#include "../cabecalhos/pontos.h"
+#include "../cabecalhos/linhas.h"
+#include "../cabecalhos/poligonos.h"
+#include "../cabecalhos/globais.h"
+#include "../cabecalhos/transformar.h"
+#include "../cabecalhos/matrizes.h"
 
 Pontos *pontos;
 Linhas *linhas;

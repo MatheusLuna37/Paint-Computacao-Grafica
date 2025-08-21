@@ -1,0 +1,28 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build paint",
+      "type": "shell",
+      "command": "gcc",
+      "args": 
+      [
+        "src/main.c", 
+        "src/estruturas/pontos.c", 
+        "src/estruturas/linhas.c", 
+        "src/estruturas/poligonos.c", 
+        "src/estruturas/matrizes.c", 
+        "src/transformacoes/transformar.c", 
+        "src/globais.c", 
+        "-lGL", 
+        "-lGLU", 
+        "-lglut", 
+        "-lm", 
+        "-o", 
+        "paint"
+      ],
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": ["$gcc"]
+    }
+  ]
+}

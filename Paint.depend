@@ -92,3 +92,81 @@
 	"globais.h"
 	"transformar.h"
 
+1755812762 source:/home/irlan-barros/faculdade/projetos/Paint-Computacao-Grafica/globais.c
+	<stdio.h>
+	<stdlib.h>
+	"globais.h"
+
+1755812762 /home/irlan-barros/faculdade/projetos/Paint-Computacao-Grafica/globais.h
+
+1755812762 source:/home/irlan-barros/faculdade/projetos/Paint-Computacao-Grafica/matrizes.c
+	<stdio.h>
+	<stdlib.h>
+	"globais.h"
+	"matrizes.h"
+	"pontos.h"
+
+1755812762 /home/irlan-barros/faculdade/projetos/Paint-Computacao-Grafica/matrizes.h
+	"pontos.h"
+
+1755812762 /home/irlan-barros/faculdade/projetos/Paint-Computacao-Grafica/pontos.h
+
+1755812762 source:/home/irlan-barros/faculdade/projetos/Paint-Computacao-Grafica/transformar.c
+	<stdlib.h>
+	<stdio.h>
+	<math.h>
+	"pontos.h"
+	"linhas.h"
+	"poligonos.h"
+	"matrizes.h"
+	"globais.h"
+	"transformar.h"
+
+1755812762 /home/irlan-barros/faculdade/projetos/Paint-Computacao-Grafica/linhas.h
+	"pontos.h"
+
+1755812762 /home/irlan-barros/faculdade/projetos/Paint-Computacao-Grafica/poligonos.h
+	"pontos.h"
+
+1755812762 /home/irlan-barros/faculdade/projetos/Paint-Computacao-Grafica/transformar.h
+
+1755813502 source:/home/irlan-barros/faculdade/projetos/Paint-Computacao-Grafica/linhas.c
+	<stdio.h>
+	<stdlib.h>
+	<stdbool.h>
+	<GL/glut.h>
+	<math.h>
+	"pontos.h"
+	"linhas.h"
+	"matrizes.h"
+
+1755813502 source:/home/irlan-barros/faculdade/projetos/Paint-Computacao-Grafica/poligonos.c
+	<stdio.h>
+	<stdlib.h>
+	<stdbool.h>
+	<GL/glut.h>
+	"poligonos.h"
+
+1755813502 source:/home/irlan-barros/faculdade/projetos/Paint-Computacao-Grafica/pontos.c
+	<stdio.h>
+	<stdlib.h>
+	<stdbool.h>
+	<GL/glut.h>
+	<math.h>
+	"pontos.h"
+	"linhas.h"
+	"matrizes.h"
+	"globais.h"
+
+1755813502 source:/home/irlan-barros/faculdade/projetos/Paint-Computacao-Grafica/main.c
+	<GL/glut.h>
+	<GL/freeglut.h>
+	<stdbool.h>
+	<stdio.h>
+	"pontos.h"
+	"linhas.h"
+	"poligonos.h"
+	"globais.h"
+	"transformar.h"
+	"matrizes.h"
+
