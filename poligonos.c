@@ -10,12 +10,15 @@ typedef struct PoligonoEl {
     struct PoligonoEl *prox;
 } PoligonoEl;
 
-static Poligonos SELECIONADO = NULL;
+static Poligonos POLIGONO_SELECIONADO = NULL;
 static PoligonoEl *POLIGONO_EM_CONSTRUCAO = NULL;
 static Ponto PRIMEIRO_PONTO = {0,0};
 static Ponto ULTIMO_PONTO = {0,0};
 static int desenhando = 0;
 static float TOLERANCIA = 10;
+static int transladando = 0;
+static int rotacionando = 0;
+static int escalando = 0;
 
 Poligonos *inicializar_poligonos() {
     Poligonos *poligonos = (Poligonos *) malloc(sizeof(Poligonos));
@@ -23,7 +26,7 @@ Poligonos *inicializar_poligonos() {
     return poligonos;
 }
 
-// Adiciona um polígono já pronto à lista principal (função interna)
+// Adiciona um polï¿½gono jï¿½ pronto ï¿½ lista principal (funï¿½ï¿½o interna)
 int add_poligono(Poligono poligono, Poligonos *poligonos) {
     if (poligonos == NULL) return 0;
     PoligonoEl *novo = (PoligonoEl *) malloc(sizeof(PoligonoEl));
@@ -32,6 +35,11 @@ int add_poligono(Poligono poligono, Poligonos *poligonos) {
     novo->prox = *poligonos;
     *poligonos = novo;
     return 1;
+}
+
+Pontos get_poligono_pontos() {
+    if (POLIGONO_SELECIONADO == NULL) return NULL;
+    return POLIGONO_SELECIONADO->poligono.pontos;
 }
 
 int add_vertice_poligono_atual(float mouseX, float mouseY, Poligonos *poligonos) {
@@ -78,11 +86,11 @@ int cancelar_poligono_atual() {
 int desenhar_previa_poligono(float mouseX, float mouseY) {
     if (!desenhando) return 0;
 
-    glColor3f(0.5, 0.5, 0.5); // Cor cinza para a prévia
+    glColor3f(0.5, 0.5, 0.5); // Cor cinza para a prï¿½via
     glBegin(GL_LINE_STRIP);
-        converter_vertices(POLIGONO_EM_CONSTRUCAO->poligono.pontos); // Reusa a função para desenhar os vértices
+        converter_vertices(POLIGONO_EM_CONSTRUCAO->poligono.pontos); // Reusa a funï¿½ï¿½o para desenhar os vï¿½rtices
     glEnd();
-    // Desenha a linha do último ponto até o mouse
+    // Desenha a linha do ï¿½ltimo ponto atï¿½ o mouse
     glBegin(GL_LINES);
         glVertex2f(ULTIMO_PONTO.x, ULTIMO_PONTO.y);
         glVertex2f(mouseX, mouseY);
@@ -92,28 +100,28 @@ int desenhar_previa_poligono(float mouseX, float mouseY) {
     return 1;
 }
 
-// Desenha todos os polígonos finalizados
+// Desenha todos os polï¿½gonos finalizados
 int desenhar_poligonos(Poligonos *poligonos) {
     if (poligonos == NULL) return 0;
     PoligonoEl *aux = *poligonos;
     while (aux != NULL) {
-        if (aux == SELECIONADO) {
-            glColor3f(0, 1, 0); // Cor para polígono selecionado
+        if (aux == POLIGONO_SELECIONADO) {
+            glColor3f(0, 1, 0); // Cor para polï¿½gono selecionado
         }
 
-        // Para desenhar o polígono, iteramos por sua lista de pontos
-        glBegin(GL_LINE_LOOP); // GL_LINE_LOOP conecta o último ponto ao primeiro
+        // Para desenhar o polï¿½gono, iteramos por sua lista de pontos
+        glBegin(GL_LINE_LOOP); // GL_LINE_LOOP conecta o ï¿½ltimo ponto ao primeiro
             converter_vertices(aux->poligono.pontos);
         glEnd();
 
         aux = aux->prox;
-        glColor3f(0, 0, 0); // Reseta para a cor padrão
+        glColor3f(0, 0, 0); // Reseta para a cor padrï¿½o
     }
     return 1;
 }
 
 void resetar_poligono_selecionado() {
-    SELECIONADO = 0;
+    POLIGONO_SELECIONADO = 0;
 }
 
 int selecionar_poligono(float mouseX, float mouseY, Poligonos *poligonos) {
@@ -123,43 +131,43 @@ int selecionar_poligono(float mouseX, float mouseY, Poligonos *poligonos) {
     while (buscador != NULL) {
         count = contar_arestas_atingidas(mouseX, mouseY, buscador->poligono.pontos);
         if (count % 2 == 1) {
-            SELECIONADO = buscador;
+            POLIGONO_SELECIONADO = buscador;
             return 1;
         }
         buscador = buscador->prox;
     }
-    SELECIONADO = NULL;
+    POLIGONO_SELECIONADO = NULL;
     return 0;
 }
 
 int excluir_poligono_selecionado(Poligonos *poligonos) {
-    if (poligonos == NULL || SELECIONADO == NULL) return 0;
+    if (poligonos == NULL || POLIGONO_SELECIONADO == NULL) return 0;
 
-    // Libera a memória da lista de pontos ANTES de liberar o polígono
-    excluir_todos_pontos(SELECIONADO->poligono.pontos);
+    // Libera a memï¿½ria da lista de pontos ANTES de liberar o polï¿½gono
+    excluir_todos_pontos(POLIGONO_SELECIONADO->poligono.pontos);
 
-    if (SELECIONADO == *poligonos) {
-        *poligonos = SELECIONADO->prox;
-        free(SELECIONADO);
-        SELECIONADO = NULL;
+    if (POLIGONO_SELECIONADO == *poligonos) {
+        *poligonos = POLIGONO_SELECIONADO->prox;
+        free(POLIGONO_SELECIONADO);
+        POLIGONO_SELECIONADO = NULL;
         return 1;
     }
 
     PoligonoEl *buscador = (*poligonos)->prox;
     PoligonoEl *anterior = *poligonos;
-    while (buscador != NULL && buscador != SELECIONADO) {
+    while (buscador != NULL && buscador != POLIGONO_SELECIONADO) {
         anterior = buscador;
         buscador = buscador->prox;
     }
 
     if (buscador == NULL) {
-        SELECIONADO = NULL;
+        POLIGONO_SELECIONADO = NULL;
         return 0;
     }
 
     anterior->prox = buscador->prox;
     free(buscador);
-    SELECIONADO = NULL;
+    POLIGONO_SELECIONADO = NULL;
     return 1;
 }
 

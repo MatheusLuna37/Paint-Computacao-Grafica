@@ -1,17 +1,19 @@
 #include <GL/glut.h>
+#include <GL/freeglut.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <windows.h>
 #include "pontos.h"
 #include "linhas.h"
 #include "poligonos.h"
-
-int screenWidth = 1280;
-int screenHeight = 720;
+#include "globais.h"
+#include "transformar.h"
 
 Pontos *pontos;
 Linhas *linhas;
 Poligonos *poligonos;
+
+static Pontos SELECIONADO = NULL;
 
 // Estado
 int modo = -1;
@@ -25,9 +27,14 @@ int objeto = -1;
 -1: nenhum
 1: ponto
 2: linha
-3: polígono
+3: polï¿½gono
 */
 int action = -1;
+
+int esquerdo = 0;
+int direito = 0;
+
+int dir = 0;
 
 float mouseX, mouseY;
 
@@ -40,11 +47,40 @@ void init() {
     pontos = inicializar_pontos();
     linhas = inicializar_linhas();
     poligonos = inicializar_poligonos();
+
+    TRANSLACAO = alocar_matriz(3,3);
+    ROTACAO = alocar_matriz(3,3);
+    ESCALA = alocar_matriz(3,3);
+    CISALHAMENTO = alocar_matriz(3,3);
+    ROTACAO_CENTROIDE = alocar_matriz(3,3);
+    ESCALA_CENTROIDE = alocar_matriz(3,3);
+    CISALHAMENTO_CENTROIDE = alocar_matriz(3,3);
+    PONTO_HOMOGENEO = alocar_matriz(3,1);
+    RESULTADO = alocar_matriz(3,3);
+    RESULTADOP = alocar_matriz(3,1);
 }
 
-// Callback de clique do mouse
+void destruction() {
+    excluir_todos_pontos(pontos);
+    excluir_todas_linhas(linhas);
+    excluir_todos_poligonos(poligonos);
+
+    liberar_matriz(TRANSLACAO,3);
+    liberar_matriz(ROTACAO,3);
+    liberar_matriz(ESCALA,3);
+    liberar_matriz(CISALHAMENTO,3);
+    liberar_matriz(ROTACAO_CENTROIDE,3);
+    liberar_matriz(ESCALA_CENTROIDE,3);
+    liberar_matriz(CISALHAMENTO_CENTROIDE,3);
+    liberar_matriz(PONTO_HOMOGENEO,3);
+    liberar_matriz(RESULTADO,3);
+    liberar_matriz(RESULTADOP,3);
+}
+
 void mouse(int button, int state, int x, int y) {
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+        esquerdo = 1;
+        dir = 0;
         mouseX = x;
         mouseY = screenHeight - y;
         if (modo == 1) {
@@ -56,45 +92,19 @@ void mouse(int button, int state, int x, int y) {
                 add_vertice_poligono_atual(mouseX, mouseY, poligonos);
             }
         } else if (modo == 0) {
-            resetar_linha_selecionada();
-            resetar_poligono_selecionado();
-            resetar_ponto_selecionado();
-            if (selecionar_ponto(mouseX, mouseY, pontos)) {}
-            else if (selecionar_linha(mouseX, mouseY, linhas)) {}
-            else if (selecionar_poligono(mouseX, mouseY, poligonos)) {}
-            if (action == 2) {
-                parar_rotacao();
-                parar_rotacao_linha();
-                parar_escala_linha();
-                iniciar_translado();
-                iniciar_translado_linha();
-            } else if (action == 3) {
-                parar_translado();
-                parar_translado_linha();
-                parar_rotacao();
-                parar_rotacao_linha();
-                iniciar_escala_linha();
-            } else if (action == 4) {
-                parar_translado();
-                parar_translado_linha();
-                parar_escala_linha();
-                iniciar_rotacao();
-                iniciar_rotacao_linha();
-            }
+            objeto = selecionar_objeto(mouseX, mouseY, pontos, linhas, poligonos, SELECIONADO);
         }
         glutPostRedisplay();
     }
     if (button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
-        parar_translado();
-        parar_rotacao(mouseX, mouseY);
-        parar_translado_linha();
-        parar_rotacao_linha();
-        parar_escala_linha();
+        esquerdo = 0;
     }
     if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN) {
         if (modo == 1) {
             if (objeto == 3) {
                 if (cancelar_poligono_atual());
+            } else if (objeto == 2) {
+                if (cancelar_linha_atual());
             }
         }
     }
@@ -104,12 +114,18 @@ void motion(int x, int y) {
     mouseX = x;
     mouseY = screenHeight - y;
 
-    if (transladar_selecionado(mouseX, mouseY));
-    if (rotacionar_selecionado(mouseX, mouseY));
-    if (transladar_selecionada(mouseX, mouseY));
-    if (rotacionar_selecionada(mouseX, mouseY));
-    if (escalar_selecionada(mouseX, mouseY));
+    if (modo == 0) {
+        aplicar_transformacao(action, objeto, esquerdo, mouseX, mouseY, 0, SELECIONADO);
+    }
 
+    glutPostRedisplay();
+}
+
+void wheel(int button, int direction, int x, int y) {
+    dir = direction;
+    if (action == 3) {
+        aplicar_transformacao(action, objeto, esquerdo, mouseX, mouseY, dir, SELECIONADO);
+    }
     glutPostRedisplay();
 }
 
@@ -122,7 +138,7 @@ void keyboard(unsigned char key, int x, int y) {
             objeto = 2; //linha
             break;
         case '3':
-            objeto = 3; //polígono
+            objeto = 3; //polï¿½gono
             break;
         case 's':
             modo = 0; //selecionar
@@ -145,8 +161,12 @@ void keyboard(unsigned char key, int x, int y) {
         case 'r':
             action = 4;
             break;
+        case 'i':
+            action == 5;
+            aplicar_transformacao(action, objeto, esquerdo, mouseX, mouseY, 0, SELECIONADO);
+            break;
         case 'c':
-            action = 5;
+            action = 6;
             break;
         case 'p':
             modo = -1;
@@ -172,7 +192,7 @@ void display() {
     desenhar_linhas(linhas);
     desenhar_poligonos(poligonos);
 
-    if (desenhar_previa_linha(mouseX, mouseY, linhas));
+    if (desenhar_previa_linha(mouseX, mouseY));
     if (desenhar_previa_poligono(mouseX, mouseY));
 
     glFlush();
@@ -191,11 +211,11 @@ int main(int argc, char** argv) {
     glutKeyboardFunc(keyboard);
     glutMotionFunc(motion);
     glutPassiveMotionFunc(motion);
+    glutMouseWheelFunc(wheel);
 
     glutMainLoop();
 
-    excluir_todos_pontos(pontos);
-    excluir_todas_linhas(linhas);
-    excluir_todos_poligonos(poligonos);
+    destruction();
+
     return 0;
 }

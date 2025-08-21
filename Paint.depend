@@ -1,14 +1,17 @@
 # depslib dependency file v1.0
-1755735811 source:c:\users\samsung\documents\paint\main.c
+1755789713 source:c:\users\samsung\documents\paint\main.c
 	<GL/glut.h>
+	<GL/freeglut.h>
 	<stdbool.h>
 	<stdio.h>
 	<windows.h>
 	"pontos.h"
 	"linhas.h"
 	"poligonos.h"
+	"globais.h"
+	"transformar.h"
 
-1755735162 source:c:\users\samsung\documents\paint\pontos.c
+1755789517 source:c:\users\samsung\documents\paint\pontos.c
 	<stdio.h>
 	<stdlib.h>
 	<windows.h>
@@ -18,8 +21,9 @@
 	"pontos.h"
 	"linhas.h"
 	"matrizes.h"
+	"globais.h"
 
-1755735163 c:\users\samsung\documents\paint\pontos.h
+1755789604 c:\users\samsung\documents\paint\pontos.h
 
 1755612325 source:c:\users\samsung\documents\paint\linha.c
 	<stdio.h>
@@ -31,23 +35,24 @@
 
 1755634738 source:c:\users\samsung\documents\paint\poligono.c
 
-1755735811 c:\users\samsung\documents\paint\linhas.h
+1755789645 c:\users\samsung\documents\paint\linhas.h
 	"pontos.h"
 
-1755733876 source:c:\users\samsung\documents\paint\linhas.c
+1755789409 source:c:\users\samsung\documents\paint\linhas.c
 	<stdio.h>
 	<stdlib.h>
 	<windows.h>
 	<stdbool.h>
 	<GL/glut.h>
+	<math.h>
 	"pontos.h"
 	"linhas.h"
 	"matrizes.h"
 
-1755735162 c:\users\samsung\documents\paint\poligonos.h
+1755789684 c:\users\samsung\documents\paint\poligonos.h
 	"pontos.h"
 
-1755735162 source:c:\users\samsung\documents\paint\poligonos.c
+1755789282 source:c:\users\samsung\documents\paint\poligonos.c
 	<stdio.h>
 	<stdlib.h>
 	<windows.h>
@@ -55,9 +60,24 @@
 	<GL/glut.h>
 	"poligonos.h"
 
-1755711874 source:c:\users\samsung\documents\paint\matrizes.c
+1755781278 source:c:\users\samsung\documents\paint\matrizes.c
 	<stdio.h>
 	<stdlib.h>
+	"globais.h"
+	"matrizes.h"
+	"pontos.h"
 
-1755711875 c:\users\samsung\documents\paint\matrizes.h
+1755781306 c:\users\samsung\documents\paint\matrizes.h
+	"pontos.h"
+
+1755781884 source:c:\users\samsung\documents\paint\globais.h
+
+1755781875 source:c:\users\samsung\documents\paint\globais.c
+	<stdio.h>
+	<stdlib.h>
+	"globais.h"
+
+1755781884 c:\users\samsung\documents\paint\globais.h
+
+1755789057 c:\users\samsung\documents\paint\transformar.h
 

@@ -8,7 +8,7 @@
 #include "linhas.h"
 #include "matrizes.h"
 
-static Linhas SELECIONADA = NULL;
+static Linhas LINHA_SELECIONADA = NULL;
 static Ponto PIVO = {0,0};
 static float TOLERANCIA = 10;
 static int desenhando = 0;
@@ -38,7 +38,12 @@ int add_linha(Linha linha, Linhas *linhas) {
 }
 
 void resetar_linha_selecionada() {
-    SELECIONADA = 0;
+    LINHA_SELECIONADA = 0;
+}
+
+Pontos get_linha_pontos() {
+    if (LINHA_SELECIONADA == NULL) return NULL;
+    return LINHA_SELECIONADA->linha.pontos;
 }
 
 int criar_linha(float mouseX, float mouseY, Linhas *linhas) {
@@ -48,11 +53,14 @@ int criar_linha(float mouseX, float mouseY, Linhas *linhas) {
         return 1;
     }
     desenhando = 0;
-    add_linha((Linha){(Ponto){PIVO.x, PIVO.y}, (Ponto){mouseX, mouseY}}, linhas);
+    Pontos *pontos = inicializar_pontos();
+    add_ponto(PIVO, pontos);
+    add_ponto((Ponto){mouseX, mouseY}, pontos);
+    add_linha((Linha){pontos}, linhas);
     return 1;
 }
 
-int desenhar_previa_linha(float mouseX, float mouseY, Linhas *linhas) {
+int desenhar_previa_linha(float mouseX, float mouseY) {
     if (!desenhando) return 0;
     glBegin(GL_LINES);
         glVertex2f(PIVO.x, PIVO.y);
@@ -62,146 +70,9 @@ int desenhar_previa_linha(float mouseX, float mouseY, Linhas *linhas) {
     return 1;
 }
 
-void iniciar_translado_linha() {
-    transladando = 1;
-}
-
-void parar_translado_linha() {
-    transladando = 0;
-}
-
-int transladar_selecionada(float mouseX, float mouseY) {
-    if (SELECIONADA == NULL || !transladando) return 0;
-    float xm = (SELECIONADA->linha.p1.x + SELECIONADA->linha.p2.x)/2;
-    float ym = (SELECIONADA->linha.p1.y + SELECIONADA->linha.p2.y)/2;
-    float **mat_t = matriz_translacao(mouseX-xm, mouseY-ym);
-    imprimir_matriz(mat_t, 3, 3);
-    float **mat_p1 = ponto_homogeneo((Ponto){SELECIONADA->linha.p1.x, SELECIONADA->linha.p1.y});
-    float **mat_p2 = ponto_homogeneo((Ponto){SELECIONADA->linha.p2.x, SELECIONADA->linha.p2.y});
-    float **resultado1 = multiplicar_matrizes(mat_t, 3, 3,
-                                              mat_p1, 3, 1);
-    float **resultado2 = multiplicar_matrizes(mat_t, 3, 3,
-                                              mat_p2, 3, 1);
-    liberar_matriz(mat_t, 3);
-    liberar_matriz(mat_p1, 3);
-    liberar_matriz(mat_p2, 3);
-
-    SELECIONADA->linha.p1.x = resultado1[0][0];
-    SELECIONADA->linha.p1.y = resultado1[1][0];
-    SELECIONADA->linha.p2.x = resultado2[0][0];
-    SELECIONADA->linha.p2.y = resultado2[1][0];
-
-    liberar_matriz(resultado1, 3);
-    liberar_matriz(resultado2, 3);
-
-    return 1;
-}
-
-void iniciar_rotacao_linha() {
-    rotacionando = 1;
-}
-
-void parar_rotacao_linha() {
-    rotacionando = 0;
-}
-
-int rotacionar_selecionada(float mouseX, float mouseY) {
-    if (SELECIONADA == NULL || !rotacionando) return 0;
-    float xm = (SELECIONADA->linha.p1.x + SELECIONADA->linha.p2.x)/2;
-    float ym = (SELECIONADA->linha.p1.y + SELECIONADA->linha.p2.y)/2;
-    float x = SELECIONADA->linha.p1.x - xm;
-    float y = SELECIONADA->linha.p1.y - ym;
-    float mousevx = mouseX - xm;
-    float mousevy = mouseY - ym;
-    float dot   = mousevx * x + mousevy * y;
-    float cross = -mousevx * y + mousevy * x;
-    float norm_u = sqrtf(mousevx*mousevx + mousevy*mousevy);
-    float norm_v = sqrtf(x*x + y*y);
-
-    float cos_theta = dot / (norm_u * norm_v);
-    float sin_theta = cross / (norm_u * norm_v);
-    float **mat_r = matriz_rotacao(sin_theta, cos_theta);
-    float **mat_t = matriz_translacao(-xm, -ym);
-    float **mat_ti = matriz_translacao(xm, ym);
-    float **mat_ti_x_mat_r = multiplicar_matrizes(mat_ti, 3, 3, mat_r, 3, 3);
-
-    liberar_matriz(mat_ti, 3);
-    liberar_matriz(mat_r, 3);
-
-    float **mat_ti_x_mat_r_x_mat_t = multiplicar_matrizes(mat_ti_x_mat_r, 3, 3, mat_t, 3, 3);
-
-    liberar_matriz(mat_ti_x_mat_r, 3);
-    liberar_matriz(mat_t, 3);
-
-    float **mat_p1 = ponto_homogeneo((Ponto){SELECIONADA->linha.p1.x, SELECIONADA->linha.p1.y});
-    float **mat_p2 = ponto_homogeneo((Ponto){SELECIONADA->linha.p2.x, SELECIONADA->linha.p2.y});
-    float **resultado1 = multiplicar_matrizes(mat_ti_x_mat_r_x_mat_t, 3, 3,
-                                              mat_p1, 3, 1);
-    float **resultado2 = multiplicar_matrizes(mat_ti_x_mat_r_x_mat_t, 3, 3,
-                                              mat_p2, 3, 1);
-
-    liberar_matriz(mat_ti_x_mat_r_x_mat_t, 3);
-    liberar_matriz(mat_p1, 3);
-    liberar_matriz(mat_p2, 3);
-
-    SELECIONADA->linha.p1.x = resultado1[0][0];
-    SELECIONADA->linha.p1.y = resultado1[1][0];
-    SELECIONADA->linha.p2.x = resultado2[0][0];
-    SELECIONADA->linha.p2.y = resultado2[1][0];
-
-    liberar_matriz(resultado1, 3);
-    liberar_matriz(resultado2, 3);
-
-    return 1;
-}
-
-void iniciar_escala_linha() {
-    escalando = 1;
-}
-
-void parar_escala_linha() {
-    escalando = 0;
-}
-
-int escalar_selecionada(float mouseX, float mouseY) {
-    if (SELECIONADA == NULL || !escalando) return 0;
-    float xm = (SELECIONADA->linha.p1.x + SELECIONADA->linha.p2.x)/2;
-    float ym = (SELECIONADA->linha.p1.y + SELECIONADA->linha.p2.y)/2;
-    float distx = xm-mouseX;
-    float disty = ym-mouseY;
-    float dist = sqrtf(distx*distx + disty*disty);
-    float **mat_e = matriz_escala(dist/1400, dist/1400);
-    float **mat_t = matriz_translacao(-xm, -ym);
-    float **mat_ti = matriz_translacao(xm, ym);
-    float **mat_ti_x_mat_e = multiplicar_matrizes(mat_ti, 3, 3, mat_e, 3, 3);
-
-    liberar_matriz(mat_ti, 3);
-    liberar_matriz(mat_e, 3);
-
-    float **mat_ti_x_mat_e_x_mat_t = multiplicar_matrizes(mat_ti_x_mat_e, 3, 3, mat_t, 3, 3);
-
-    liberar_matriz(mat_ti_x_mat_e, 3);
-    liberar_matriz(mat_t, 3);
-
-    float **mat_p1 = ponto_homogeneo((Ponto){SELECIONADA->linha.p1.x, SELECIONADA->linha.p1.y});
-    float **mat_p2 = ponto_homogeneo((Ponto){SELECIONADA->linha.p2.x, SELECIONADA->linha.p2.y});
-    float **resultado1 = multiplicar_matrizes(mat_ti_x_mat_e_x_mat_t, 3, 3,
-                                              mat_p1, 3, 1);
-    float **resultado2 = multiplicar_matrizes(mat_ti_x_mat_e_x_mat_t, 3, 3,
-                                              mat_p2, 3, 1);
-
-    liberar_matriz(mat_ti_x_mat_e_x_mat_t, 3);
-    liberar_matriz(mat_p1, 3);
-    liberar_matriz(mat_p2, 3);
-
-    SELECIONADA->linha.p1.x = resultado1[0][0];
-    SELECIONADA->linha.p1.y = resultado1[1][0];
-    SELECIONADA->linha.p2.x = resultado2[0][0];
-    SELECIONADA->linha.p2.y = resultado2[1][0];
-
-    liberar_matriz(resultado1, 3);
-    liberar_matriz(resultado2, 3);
-
+int cancelar_linha_atual() {
+    if (!desenhando) return 0;
+    desenhando = 0;
     return 1;
 }
 
@@ -209,15 +80,14 @@ int desenhar_linhas(Linhas *linhas) {
     if (linhas == NULL) return 0;
     LinhaEl *aux = *linhas;
     while (aux != NULL) {
-        if (aux == SELECIONADA) {
+        if (aux == LINHA_SELECIONADA) {
             glColor3f(0, 1, 0); // Cor para linha selecionada
         }
         glBegin(GL_LINES);
-            glVertex2f(aux->linha.p1.x, aux->linha.p1.y);
-            glVertex2f(aux->linha.p2.x, aux->linha.p2.y);
+            converter_vertices(aux->linha.pontos);
         glEnd();
         aux = aux->prox;
-        glColor3f(0, 0, 0); // Reseta para a cor padrão
+        glColor3f(0, 0, 0); // Reseta para a cor padrï¿½o
     }
     return 1;
 }
@@ -237,77 +107,54 @@ unsigned int codificador(Ponto p, float xmin, float xmax, float ymin, float ymax
     return codigo;
 }
 
-int avaliar_linha(Ponto p1, Ponto p2, float xmin, float xmax, float ymin, float ymax) {
-    unsigned int codigo1, codigo2, and_codigos, esq, dir, ab, ac;
-    codigo1 = codificador(p1, xmin, xmax, ymin, ymax);
-    codigo2 = codificador(p2, xmin, xmax, ymin, ymax);
-    and_codigos = codigo1 & codigo2;
-    esq = codigo1 & 0b1000;
-    dir = codigo1 & 0b0100;
-    ab = codigo1 & 0b0010;
-    ac = codigo1 & 0b0001;
-    if (codigo1 == 0b0000 || codigo2 == 0b0000) {
-        return 1;
-    } else if (and_codigos == 0b0000) {
-        if (esq) {
-            return avaliar_linha((Ponto){xmin, p1.y + (xmin-p1.x)*(p2.y-p1.y)/(p2.x-p1.x)}, p2, xmin, xmax, ymin, ymax);
-        } else if (dir) {
-            return avaliar_linha((Ponto){xmax, p1.y + (xmax-p1.x)*(p2.y-p1.y)/(p2.x-p1.x)}, p2, xmin, xmax, ymin, ymax);
-        } else if (ab) {
-            return avaliar_linha((Ponto){p1.x + (ymin-p1.y)*(p2.x-p1.x)/(p2.y-p1.y), ymin}, p2, xmin, xmax, ymin, ymax);
-        } else {
-            return avaliar_linha((Ponto){p1.x + (ymax-p1.y)*(p2.x-p1.x)/(p2.y-p1.y), ymax}, p2, xmin, xmax, ymin, ymax);
-        }
-    }
-    return 0;
-}
-
 int selecionar_linha(float mouseX, float mouseY, Linhas *linhas) {
     if (linhas == NULL) return 0;
     float xmin = mouseX-TOLERANCIA, ymin = mouseY-TOLERANCIA, xmax = mouseX+TOLERANCIA, ymax = mouseY+TOLERANCIA;
     LinhaEl* buscador = *linhas;
     while (buscador != NULL) {
-        if(avaliar_linha(buscador->linha.p1, buscador->linha.p2, xmin, xmax, ymin, ymax)) {
-            SELECIONADA = buscador;
+        if(avaliador_de_linha((*(buscador->linha.pontos)), xmin, xmax, ymin, ymax)) {
+            LINHA_SELECIONADA = buscador;
             return 1;
         }
         buscador = buscador->prox;
     }
-    SELECIONADA = NULL;
+    LINHA_SELECIONADA = NULL;
     return 0;
 }
 
-// NOVO: Função para excluir a linha atualmente em SELECIONADA
+// NOVO: Funï¿½ï¿½o para excluir a linha atualmente em LINHA_SELECIONADA
 int excluir_linha_selecionada(Linhas *linhas) {
     if (linhas == NULL) return 0;
-    if (SELECIONADA == NULL) return 0;
+    if (LINHA_SELECIONADA == NULL) return 0;
 
-    // Caso 1: A linha selecionada é o primeiro elemento da lista
-    if (SELECIONADA == *linhas) {
-        *linhas = SELECIONADA->prox;
-        free(SELECIONADA);
-        SELECIONADA = NULL;
+    excluir_todos_pontos(LINHA_SELECIONADA->linha.pontos);
+
+    // Caso 1: A linha selecionada ï¿½ o primeiro elemento da lista
+    if (LINHA_SELECIONADA == *linhas) {
+        *linhas = LINHA_SELECIONADA->prox;
+        free(LINHA_SELECIONADA);
+        LINHA_SELECIONADA = NULL;
         return 1;
     }
 
-    // Caso 2: A linha selecionada está no meio ou no fim da lista
+    // Caso 2: A linha selecionada estï¿½ no meio ou no fim da lista
     LinhaEl *buscador = (*linhas)->prox;
     LinhaEl *anterior = *linhas;
-    while (buscador != NULL && buscador != SELECIONADA) {
+    while (buscador != NULL && buscador != LINHA_SELECIONADA) {
         anterior = buscador;
         buscador = buscador->prox;
     }
 
-    // Se não encontrou a linha na lista (salvaguarda)
+    // Se nï¿½o encontrou a linha na lista (salvaguarda)
     if (buscador == NULL) {
-        SELECIONADA = NULL;
+        LINHA_SELECIONADA = NULL;
         return 0;
     }
 
     // Remove o elemento da lista
     anterior->prox = buscador->prox;
     free(buscador);
-    SELECIONADA = NULL;
+    LINHA_SELECIONADA = NULL;
     return 1;
 }
 
@@ -315,6 +162,7 @@ int excluir_todas_linhas(Linhas *linhas) {
     if (linhas == NULL) return 0;
     LinhaEl *aux = *linhas;
     while (aux != NULL) {
+        excluir_todos_pontos(aux->linha.pontos);
         *linhas = aux->prox;
         free(aux);
         aux = *linhas;

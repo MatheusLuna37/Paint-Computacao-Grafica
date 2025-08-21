@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "globais.h"
+#include "matrizes.h"
+#include "pontos.h"
 
 float** alocar_matriz(int linhas, int colunas) {
     float** matriz = (float**)malloc(linhas * sizeof(float*));
@@ -37,37 +40,107 @@ void imprimir_matriz(float** matriz, int linhas, int colunas) {
     }
 }
 
-float** multiplicar_matrizes(float** matrizA, int linhasA, int colunasA,
-                             float** matrizB, int linhasB, int colunasB) {
+void multiplicar_matrizes(float **Resultado,
+                          float** matrizA, int linhasA, int colunasA,
+                          float** matrizB, int linhasB, int colunasB) {
 
     if (colunasA != linhasB) {
-        fprintf(stderr, "Erro: As dimensões das matrizes são incompatíveis para multiplicação.\n");
-        return NULL;
+            Resultado = NULL;
     }
 
-    // 2. Alocação da matriz resultado
-    // A matriz resultado terá dimensões: linhasA x colunasB
+    if (Resultado == NULL) {
+        return;
+    }
+
     int linhasR = linhasA;
     int colunasR = colunasB;
-    float** matrizResultado = alocar_matriz(linhasR, colunasR);
-    if (matrizResultado == NULL) {
-        fprintf(stderr, "Erro: Falha ao alocar memória para a matriz resultado.\n");
-        return NULL;
-    }
 
-    // 3. Realizar a multiplicação
-    // C[i][j] = soma(A[i][k] * B[k][j])
     for (int i = 0; i < linhasR; i++) {
         for (int j = 0; j < colunasR; j++) {
             float soma = 0.0f;
-            // O laço interno percorre as colunas de A e as linhas de B
             for (int k = 0; k < colunasA; k++) {
                 soma += matrizA[i][k] * matrizB[k][j];
             }
-            matrizResultado[i][j] = soma;
+            Resultado[i][j] = soma;
         }
     }
-
-    // 4. Retornar a matriz calculada
-    return matrizResultado;
 }
+
+void matriz_translacao(float **mat, float tx, float ty) {
+    if (mat == NULL) {
+        return;
+    }
+    mat[0][0] = 1; mat[0][1] = 0; mat[0][2] = tx;
+    mat[1][0] = 0; mat[1][1] = 1; mat[1][2] = ty;
+    mat[2][0] = 0; mat[2][1] = 0; mat[2][2] = 1;
+}
+
+void matriz_escala(float **mat, float sx, float sy) {
+    if (mat == NULL) {
+        return;
+    }
+    mat[0][0] = sx; mat[0][1] = 0; mat[0][2] = 0;
+    mat[1][0] = 0; mat[1][1] = sy; mat[1][2] = 0;
+    mat[2][0] = 0; mat[2][1] = 0; mat[2][2] = 1;
+}
+
+void matriz_rotacao(float **mat, float s, float c) {
+    if (mat == NULL) {
+        return;
+    }
+    mat[0][0] = c; mat[0][1] = -s; mat[0][2] = 0;
+    mat[1][0] = s; mat[1][1] = c; mat[1][2] = 0;
+    mat[2][0] = 0; mat[2][1] = 0; mat[2][2] = 1;
+}
+
+void matriz_cisalhamento(float **mat, float sh) {
+    if (mat == NULL) {
+        return;
+    }
+    mat[0][0] = 1; mat[0][1] = sh; mat[0][2] = 0;
+    mat[1][0] = 0; mat[1][1] = 1; mat[1][2] = 0;
+    mat[2][0] = 0; mat[2][1] = 0; mat[2][2] = 1;
+}
+
+void matriz_escala_centroide(float **mat, float sx, float sy, float xm, float ym) {
+    if (mat == NULL) {
+        return;
+    }
+    matriz_translacao(TRANSLACAO, xm, ym);
+    matriz_escala(ESCALA, sx, sy);
+    multiplicar_matrizes(RESULTADO, TRANSLACAO,3,3, ESCALA,3,3);
+    matriz_translacao(TRANSLACAO, -xm, -ym);
+    multiplicar_matrizes(mat, RESULTADO,3,3, TRANSLACAO, 3,3);
+}
+
+void matriz_rotacao_centroide(float **mat, float s, float c, float xm, float ym) {
+    if (mat == NULL) {
+        return;
+    }
+    matriz_translacao(TRANSLACAO, xm, ym);
+    matriz_rotacao(ROTACAO, s, c);
+    multiplicar_matrizes(RESULTADO, TRANSLACAO,3,3, ROTACAO,3,3);
+    matriz_translacao(TRANSLACAO, -xm, -ym);
+    multiplicar_matrizes(mat, RESULTADO,3,3, TRANSLACAO, 3,3);
+}
+
+void matriz_cisalhamento_centroide(float **mat, float sh, float xm, float ym) {
+    if (mat == NULL) {
+        return;
+    }
+    matriz_translacao(TRANSLACAO, xm, ym);
+    matriz_cisalhamento(CISALHAMENTO, sh);
+    multiplicar_matrizes(RESULTADO, TRANSLACAO,3,3, CISALHAMENTO,3,3);
+    matriz_translacao(TRANSLACAO, -xm, -ym);
+    multiplicar_matrizes(mat, RESULTADO,3,3, TRANSLACAO, 3,3);
+}
+
+void ponto_homogeneo(float **mat, Ponto p) {
+    if (mat == NULL) {
+        return;
+    }
+    mat[0][0] = p.x;
+    mat[1][0] = p.y;
+    mat[2][0] = 1;
+}
+

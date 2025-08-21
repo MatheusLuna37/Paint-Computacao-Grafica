@@ -7,9 +7,10 @@
 #include "pontos.h"
 #include "linhas.h"
 #include "matrizes.h"
+#include "globais.h"
 
 static float TOLERANCIA = 2;
-static Pontos SELECIONADO = NULL;
+static Pontos PONTO_SELECIONADO = NULL;
 static int transladando = 0;
 static int rotacionando = 0;
 static float prevMouseX, prevMouseY;
@@ -34,6 +35,41 @@ int add_ponto(Ponto ponto, Pontos *pontos) {
     novo->prox = *pontos;
     *pontos = novo;
     return 1;
+}
+
+Pontos get_ponto_selecionado() {
+    return PONTO_SELECIONADO;
+}
+
+int avaliador_de_linha(Pontos ponto_inicial, float xmin, float xmax, float ymin, float ymax) {
+    Ponto p1 = ponto_inicial->ponto;
+    Ponto p2 = ponto_inicial->prox->ponto;
+    return avaliar_linha(p1, p2, xmin, xmax, ymin, ymax);
+}
+
+int avaliar_linha(Ponto p1, Ponto p2, float xmin, float xmax, float ymin, float ymax) {
+    unsigned int codigo1, codigo2, and_codigos, esq, dir, ab, ac;
+    codigo1 = codificador(p1, xmin, xmax, ymin, ymax);
+    codigo2 = codificador(p2, xmin, xmax, ymin, ymax);
+    and_codigos = codigo1 & codigo2;
+    esq = codigo1 & 0b1000;
+    dir = codigo1 & 0b0100;
+    ab = codigo1 & 0b0010;
+    ac = codigo1 & 0b0001;
+    if (codigo1 == 0b0000 || codigo2 == 0b0000) {
+        return 1;
+    } else if (and_codigos == 0b0000) {
+        if (esq) {
+            return avaliar_linha((Ponto){xmin, p1.y + (xmin-p1.x)*(p2.y-p1.y)/(p2.x-p1.x)}, p2, xmin, xmax, ymin, ymax);
+        } else if (dir) {
+            return avaliar_linha((Ponto){xmax, p1.y + (xmax-p1.x)*(p2.y-p1.y)/(p2.x-p1.x)}, p2, xmin, xmax, ymin, ymax);
+        } else if (ab) {
+            return avaliar_linha((Ponto){p1.x + (ymin-p1.y)*(p2.x-p1.x)/(p2.y-p1.y), ymin}, p2, xmin, xmax, ymin, ymax);
+        } else {
+            return avaliar_linha((Ponto){p1.x + (ymax-p1.y)*(p2.x-p1.x)/(p2.y-p1.y), ymax}, p2, xmin, xmax, ymin, ymax);
+        }
+    }
+    return 0;
 }
 
 int contar_arestas_atingidas (float mouseX, float mouseY, Pontos *pontos) {
@@ -86,7 +122,7 @@ int desenhar_pontos(Pontos *pontos) {
     if (pontos == NULL) return 0;
     PontoEl *aux = *pontos;
     while (aux != NULL) {
-        if (aux == SELECIONADO) {
+        if (aux == PONTO_SELECIONADO) {
             glColor3f(0, 1, 0);
         }
         glBegin(GL_POINTS);
@@ -98,8 +134,48 @@ int desenhar_pontos(Pontos *pontos) {
     return 1;
 }
 
+Ponto calcular_centroide(int qtd, Pontos ponto_inicial) {
+    if (ponto_inicial == NULL) return (Ponto){-1, -1};
+    float xm = 0, ym = 0;
+    int count = 0;
+    int count_aux = 0;
+    if (qtd == -1) count_aux = -2;
+    PontoEl *buscador = ponto_inicial;
+    while (count_aux < qtd && buscador != NULL) {
+        xm += buscador->ponto.x;
+        ym += buscador->ponto.y;
+        count++;
+        if (qtd != -1) count_aux++;
+        buscador = buscador->prox;
+    }
+    xm /= count; ym /= count;
+    return (Ponto){xm, ym};
+}
+
+int transformar_pontos(float **mat, int qtd, Pontos ponto_inicial) {
+    if (ponto_inicial == NULL) return 0;
+    int count = 0;
+    if (qtd == -1) count = -2;
+    PontoEl *buscador = ponto_inicial;
+    while (count < qtd && buscador != NULL) {
+        ponto_homogeneo(PONTO_HOMOGENEO, buscador->ponto);
+        multiplicar_matrizes(RESULTADOP, mat, 3, 3, PONTO_HOMOGENEO, 3, 1);
+        buscador->ponto.x = RESULTADOP[0][0];
+        buscador->ponto.y = RESULTADOP[1][0];
+        buscador = buscador->prox;
+        if (qtd != -1) count++;
+    }
+
+    return 1;
+}
+
+Ponto vetor_ponto_centroide(Pontos *pontos, float xm, float ym) {
+    float x = (*pontos)->ponto.x, y = (*pontos)->ponto.y;
+    return (Ponto){x-xm,y-ym};
+}
+
 void resetar_ponto_selecionado() {
-    SELECIONADO = 0;
+    PONTO_SELECIONADO = 0;
 }
 
 int selecionar_ponto(float mouseX, float mouseY, Pontos *pontos) {
@@ -108,112 +184,36 @@ int selecionar_ponto(float mouseX, float mouseY, Pontos *pontos) {
     while (buscador != NULL) {
         if (buscador->ponto.x >= mouseX-TOLERANCIA && buscador->ponto.x <= mouseX+TOLERANCIA &&
             buscador->ponto.y >= mouseY-TOLERANCIA && buscador->ponto.y <= mouseY+TOLERANCIA) {
-            SELECIONADO = buscador;
+            PONTO_SELECIONADO = buscador;
             return 1;
         }
         buscador = buscador->prox;
     }
 
-    SELECIONADO = NULL;
+    PONTO_SELECIONADO = NULL;
 
     return 0;
 }
-
-float **matriz_translacao(float tx, float ty) {
-    float **mat = alocar_matriz(3, 3);
-    if (mat == NULL) {
-        return NULL;
-    }
-    mat[0][0] = 1; mat[0][1] = 0; mat[0][2] = tx;
-    mat[1][0] = 0; mat[1][1] = 1; mat[1][2] = ty;
-    mat[2][0] = 0; mat[2][1] = 0; mat[2][2] = 1;
-
-    return mat;
-}
-
-float **matriz_escala(float sx, float sy) {
-    float **mat = alocar_matriz(3, 3);
-    if (mat == NULL) {
-        return NULL;
-    }
-    mat[0][0] = sx; mat[0][1] = 0; mat[0][2] = 0;
-    mat[1][0] = 0; mat[1][1] = sy; mat[1][2] = 0;
-    mat[2][0] = 0; mat[2][1] = 0; mat[2][2] = 1;
-
-    return mat;
-}
-
-float **matriz_rotacao(float s, float c) {
-    float **mat = alocar_matriz(3, 3);
-    if (mat == NULL) {
-        return NULL;
-    }
-    mat[0][0] = c; mat[0][1] = -s; mat[0][2] = 0;
-    mat[1][0] = s; mat[1][1] = c; mat[1][2] = 0;
-    mat[2][0] = 0; mat[2][1] = 0; mat[2][2] = 1;
-
-    return mat;
-}
-
-float **matriz_cisalhamento(float sh) {
-    float **mat = alocar_matriz(3, 3);
-    if (mat == NULL) {
-        return NULL;
-    }
-    mat[0][0] = 1; mat[0][1] = sh; mat[0][2] = 0;
-    mat[1][0] = 0; mat[1][1] = 1; mat[1][2] = 0;
-    mat[2][0] = 0; mat[2][1] = 0; mat[2][2] = 1;
-
-    return mat;
-}
-
-float **ponto_homogeneo(Ponto p) {
-    float **mat = alocar_matriz(3, 1);
-    if (mat == NULL) {
-        return NULL;
-    }
-    mat[0][0] = p.x;
-    mat[1][0] = p.y;
-    mat[2][0] = 1;
-
-    return mat;
-}
-
-void iniciar_translado() {
-    transladando = 1;
-}
-
-void parar_translado() {
-    transladando = 0;
-}
-
-void iniciar_rotacao() {
-    rotacionando = 1;
-}
-
-void parar_rotacao() {
-    rotacionando = 0;
-}
-
+/*
 int transladar_selecionado(float mouseX, float mouseY) {
-    if (SELECIONADO == NULL || !transladando) return 0;
-    float **mat_t = matriz_translacao(mouseX-SELECIONADO->ponto.x, mouseY-SELECIONADO->ponto.y);
-    float **mat_p = ponto_homogeneo(SELECIONADO->ponto);
+    if (PONTO_SELECIONADO == NULL || !transladando) return 0;
+    float **mat_t = matriz_translacao(mouseX-PONTO_SELECIONADO->ponto.x, mouseY-PONTO_SELECIONADO->ponto.y);
+    float **mat_p = ponto_homogeneo(PONTO_SELECIONADO->ponto);
     float **resultado = multiplicar_matrizes(mat_t, 3, 3,
                                        mat_p, 3, 1);
     liberar_matriz(mat_t, 3);
     liberar_matriz(mat_p, 3);
 
-    SELECIONADO->ponto.x = resultado[0][0];
-    SELECIONADO->ponto.y = resultado[1][0];
+    PONTO_SELECIONADO->ponto.x = resultado[0][0];
+    PONTO_SELECIONADO->ponto.y = resultado[1][0];
 
     liberar_matriz(resultado, 3);
     return 1;
 }
 
 int rotacionar_selecionado(float mouseX, float mouseY) {
-    if (SELECIONADO == NULL || !rotacionando) return 0;
-    float x = SELECIONADO->ponto.x, y = SELECIONADO->ponto.y;
+    if (PONTO_SELECIONADO == NULL || !rotacionando) return 0;
+    float x = PONTO_SELECIONADO->ponto.x, y = PONTO_SELECIONADO->ponto.y;
     float dot   = mouseX * x + mouseY * y;
     float cross = -mouseX * y + mouseY * x;
     float norm_u = sqrtf(mouseX*mouseX + mouseY*mouseY);
@@ -222,41 +222,41 @@ int rotacionar_selecionado(float mouseX, float mouseY) {
     float cos_theta = dot / (norm_u * norm_v);
     float sin_theta = cross / (norm_u * norm_v);
     float **mat_r = matriz_rotacao(sin_theta, cos_theta);
-    float **mat_p = ponto_homogeneo(SELECIONADO->ponto);
+    float **mat_p = ponto_homogeneo(PONTO_SELECIONADO->ponto);
     float **resultado = multiplicar_matrizes(mat_r, 3, 3,
                                        mat_p, 3, 1);
     liberar_matriz(mat_r, 3);
     liberar_matriz(mat_p, 3);
 
-    SELECIONADO->ponto.x = resultado[0][0];
-    SELECIONADO->ponto.y = resultado[1][0];
+    PONTO_SELECIONADO->ponto.x = resultado[0][0];
+    PONTO_SELECIONADO->ponto.y = resultado[1][0];
 
     liberar_matriz(resultado, 3);
     return 1;
 }
-
+*/
 int excluir_ponto_selecionado(Pontos *pontos) {
     if (pontos == NULL) return 0;
-    if (SELECIONADO == NULL) return 0;
-    if (SELECIONADO == *pontos) {
-        *pontos = SELECIONADO->prox;
-        free(SELECIONADO);
-        SELECIONADO = NULL;
+    if (PONTO_SELECIONADO == NULL) return 0;
+    if (PONTO_SELECIONADO == *pontos) {
+        *pontos = PONTO_SELECIONADO->prox;
+        free(PONTO_SELECIONADO);
+        PONTO_SELECIONADO = NULL;
         return 1;
     }
     PontoEl *buscador = (*pontos)->prox;
     PontoEl *anterior = *pontos;
-    while (buscador != NULL && buscador != SELECIONADO) {
+    while (buscador != NULL && buscador != PONTO_SELECIONADO) {
         anterior = buscador;
         buscador = buscador->prox;
     }
     if (buscador == NULL) {
-        SELECIONADO = NULL;
+        PONTO_SELECIONADO = NULL;
         return 0;
     }
     anterior->prox = buscador->prox;
     free(buscador);
-    SELECIONADO = NULL;
+    PONTO_SELECIONADO = NULL;
     return 1;
 }
 
