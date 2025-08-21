@@ -98,6 +98,10 @@ int desenhar_pontos(Pontos *pontos) {
     return 1;
 }
 
+void resetar_ponto_selecionado() {
+    SELECIONADO = 0;
+}
+
 int selecionar_ponto(float mouseX, float mouseY, Pontos *pontos) {
     if (pontos == NULL) return 0;
     PontoEl* buscador = *pontos;
@@ -183,11 +187,11 @@ void parar_translado() {
     transladando = 0;
 }
 
-void iniciar_rotacao(float mouseX, float mouseY) {
+void iniciar_rotacao() {
     rotacionando = 1;
 }
 
-void parar_rotacao(float mouseX, float mouseY) {
+void parar_rotacao() {
     rotacionando = 0;
 }
 

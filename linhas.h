@@ -20,7 +20,14 @@ int desenhar_previa_linha(float mouseX, float mouseY, Linhas *linhas);
 int selecionar_linha(float mouseX, float mouseY, Linhas *linhas);
 unsigned int codificador(Ponto p, float xmin, float xmax, float ymin, float ymax);
 int transladar_selecionada(float mouseX, float mouseY);
-void iniciar_translado_linha(mouseX, mouseY);
+void iniciar_translado_linha();
 void parar_translado_linha();
+int rotacionar_selecionada(float mouseX, float mouseY);
+void iniciar_rotacao_linha();
+void parar_rotacao_linha();
+void resetar_linha_selecionada();
+int escalar_selecionada(float mouseX, float mouseY);
+void iniciar_escala_linha();
+void parar_escala_linha();
 
 #endif

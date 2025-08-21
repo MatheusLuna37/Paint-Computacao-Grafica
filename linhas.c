@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <stdbool.h>
 #include <GL/glut.h>
+#include <math.h>
 #include "pontos.h"
 #include "linhas.h"
 #include "matrizes.h"
@@ -12,7 +13,8 @@ static Ponto PIVO = {0,0};
 static float TOLERANCIA = 10;
 static int desenhando = 0;
 static int transladando = 0;
-static float prevMouseX = -1, prevMouseY = -1;
+static int rotacionando = 0;
+static int escalando = 0;
 
 typedef struct LinhaEl {
     Linha linha;
@@ -33,6 +35,10 @@ int add_linha(Linha linha, Linhas *linhas) {
     novo->prox = *linhas;
     *linhas = novo;
     return 1;
+}
+
+void resetar_linha_selecionada() {
+    SELECIONADA = 0;
 }
 
 int criar_linha(float mouseX, float mouseY, Linhas *linhas) {
@@ -56,7 +62,7 @@ int desenhar_previa_linha(float mouseX, float mouseY, Linhas *linhas) {
     return 1;
 }
 
-void iniciar_translado_linha(mouseX, mouseY) {
+void iniciar_translado_linha() {
     transladando = 1;
 }
 
@@ -66,14 +72,10 @@ void parar_translado_linha() {
 
 int transladar_selecionada(float mouseX, float mouseY) {
     if (SELECIONADA == NULL || !transladando) return 0;
-    if (prevMouseX == -1 && prevMouseY == -1) {
-        prevMouseX = mouseX;
-        prevMouseY = mouseY;
-        return 0;
-    }
-
-    printf("deltaX: %f (mouse: %f, prev: %f)\n", mouseX - prevMouseX, mouseX, prevMouseX);
-    float **mat_t = matriz_translacao(mouseX-prevMouseX, mouseY-prevMouseY);
+    float xm = (SELECIONADA->linha.p1.x + SELECIONADA->linha.p2.x)/2;
+    float ym = (SELECIONADA->linha.p1.y + SELECIONADA->linha.p2.y)/2;
+    float **mat_t = matriz_translacao(mouseX-xm, mouseY-ym);
+    imprimir_matriz(mat_t, 3, 3);
     float **mat_p1 = ponto_homogeneo((Ponto){SELECIONADA->linha.p1.x, SELECIONADA->linha.p1.y});
     float **mat_p2 = ponto_homogeneo((Ponto){SELECIONADA->linha.p2.x, SELECIONADA->linha.p2.y});
     float **resultado1 = multiplicar_matrizes(mat_t, 3, 3,
@@ -92,8 +94,114 @@ int transladar_selecionada(float mouseX, float mouseY) {
     liberar_matriz(resultado1, 3);
     liberar_matriz(resultado2, 3);
 
-    prevMouseX = mouseX;
-    prevMouseY = mouseY;
+    return 1;
+}
+
+void iniciar_rotacao_linha() {
+    rotacionando = 1;
+}
+
+void parar_rotacao_linha() {
+    rotacionando = 0;
+}
+
+int rotacionar_selecionada(float mouseX, float mouseY) {
+    if (SELECIONADA == NULL || !rotacionando) return 0;
+    float xm = (SELECIONADA->linha.p1.x + SELECIONADA->linha.p2.x)/2;
+    float ym = (SELECIONADA->linha.p1.y + SELECIONADA->linha.p2.y)/2;
+    float x = SELECIONADA->linha.p1.x - xm;
+    float y = SELECIONADA->linha.p1.y - ym;
+    float mousevx = mouseX - xm;
+    float mousevy = mouseY - ym;
+    float dot   = mousevx * x + mousevy * y;
+    float cross = -mousevx * y + mousevy * x;
+    float norm_u = sqrtf(mousevx*mousevx + mousevy*mousevy);
+    float norm_v = sqrtf(x*x + y*y);
+
+    float cos_theta = dot / (norm_u * norm_v);
+    float sin_theta = cross / (norm_u * norm_v);
+    float **mat_r = matriz_rotacao(sin_theta, cos_theta);
+    float **mat_t = matriz_translacao(-xm, -ym);
+    float **mat_ti = matriz_translacao(xm, ym);
+    float **mat_ti_x_mat_r = multiplicar_matrizes(mat_ti, 3, 3, mat_r, 3, 3);
+
+    liberar_matriz(mat_ti, 3);
+    liberar_matriz(mat_r, 3);
+
+    float **mat_ti_x_mat_r_x_mat_t = multiplicar_matrizes(mat_ti_x_mat_r, 3, 3, mat_t, 3, 3);
+
+    liberar_matriz(mat_ti_x_mat_r, 3);
+    liberar_matriz(mat_t, 3);
+
+    float **mat_p1 = ponto_homogeneo((Ponto){SELECIONADA->linha.p1.x, SELECIONADA->linha.p1.y});
+    float **mat_p2 = ponto_homogeneo((Ponto){SELECIONADA->linha.p2.x, SELECIONADA->linha.p2.y});
+    float **resultado1 = multiplicar_matrizes(mat_ti_x_mat_r_x_mat_t, 3, 3,
+                                              mat_p1, 3, 1);
+    float **resultado2 = multiplicar_matrizes(mat_ti_x_mat_r_x_mat_t, 3, 3,
+                                              mat_p2, 3, 1);
+
+    liberar_matriz(mat_ti_x_mat_r_x_mat_t, 3);
+    liberar_matriz(mat_p1, 3);
+    liberar_matriz(mat_p2, 3);
+
+    SELECIONADA->linha.p1.x = resultado1[0][0];
+    SELECIONADA->linha.p1.y = resultado1[1][0];
+    SELECIONADA->linha.p2.x = resultado2[0][0];
+    SELECIONADA->linha.p2.y = resultado2[1][0];
+
+    liberar_matriz(resultado1, 3);
+    liberar_matriz(resultado2, 3);
+
+    return 1;
+}
+
+void iniciar_escala_linha() {
+    escalando = 1;
+}
+
+void parar_escala_linha() {
+    escalando = 0;
+}
+
+int escalar_selecionada(float mouseX, float mouseY) {
+    if (SELECIONADA == NULL || !escalando) return 0;
+    float xm = (SELECIONADA->linha.p1.x + SELECIONADA->linha.p2.x)/2;
+    float ym = (SELECIONADA->linha.p1.y + SELECIONADA->linha.p2.y)/2;
+    float distx = xm-mouseX;
+    float disty = ym-mouseY;
+    float dist = sqrtf(distx*distx + disty*disty);
+    float **mat_e = matriz_escala(dist/1400, dist/1400);
+    float **mat_t = matriz_translacao(-xm, -ym);
+    float **mat_ti = matriz_translacao(xm, ym);
+    float **mat_ti_x_mat_e = multiplicar_matrizes(mat_ti, 3, 3, mat_e, 3, 3);
+
+    liberar_matriz(mat_ti, 3);
+    liberar_matriz(mat_e, 3);
+
+    float **mat_ti_x_mat_e_x_mat_t = multiplicar_matrizes(mat_ti_x_mat_e, 3, 3, mat_t, 3, 3);
+
+    liberar_matriz(mat_ti_x_mat_e, 3);
+    liberar_matriz(mat_t, 3);
+
+    float **mat_p1 = ponto_homogeneo((Ponto){SELECIONADA->linha.p1.x, SELECIONADA->linha.p1.y});
+    float **mat_p2 = ponto_homogeneo((Ponto){SELECIONADA->linha.p2.x, SELECIONADA->linha.p2.y});
+    float **resultado1 = multiplicar_matrizes(mat_ti_x_mat_e_x_mat_t, 3, 3,
+                                              mat_p1, 3, 1);
+    float **resultado2 = multiplicar_matrizes(mat_ti_x_mat_e_x_mat_t, 3, 3,
+                                              mat_p2, 3, 1);
+
+    liberar_matriz(mat_ti_x_mat_e_x_mat_t, 3);
+    liberar_matriz(mat_p1, 3);
+    liberar_matriz(mat_p2, 3);
+
+    SELECIONADA->linha.p1.x = resultado1[0][0];
+    SELECIONADA->linha.p1.y = resultado1[1][0];
+    SELECIONADA->linha.p2.x = resultado2[0][0];
+    SELECIONADA->linha.p2.y = resultado2[1][0];
+
+    liberar_matriz(resultado1, 3);
+    liberar_matriz(resultado2, 3);
+
     return 1;
 }
 

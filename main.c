@@ -56,17 +56,30 @@ void mouse(int button, int state, int x, int y) {
                 add_vertice_poligono_atual(mouseX, mouseY, poligonos);
             }
         } else if (modo == 0) {
+            resetar_linha_selecionada();
+            resetar_poligono_selecionado();
+            resetar_ponto_selecionado();
             if (selecionar_ponto(mouseX, mouseY, pontos)) {}
             else if (selecionar_linha(mouseX, mouseY, linhas)) {}
             else if (selecionar_poligono(mouseX, mouseY, poligonos)) {}
             if (action == 2) {
-                parar_rotacao(mouseX, mouseY);
+                parar_rotacao();
+                parar_rotacao_linha();
+                parar_escala_linha();
                 iniciar_translado();
-                iniciar_translado_linha(mouseX, mouseY);
+                iniciar_translado_linha();
+            } else if (action == 3) {
+                parar_translado();
+                parar_translado_linha();
+                parar_rotacao();
+                parar_rotacao_linha();
+                iniciar_escala_linha();
             } else if (action == 4) {
                 parar_translado();
-                iniciar_rotacao(mouseX, mouseY);
                 parar_translado_linha();
+                parar_escala_linha();
+                iniciar_rotacao();
+                iniciar_rotacao_linha();
             }
         }
         glutPostRedisplay();
@@ -75,6 +88,8 @@ void mouse(int button, int state, int x, int y) {
         parar_translado();
         parar_rotacao(mouseX, mouseY);
         parar_translado_linha();
+        parar_rotacao_linha();
+        parar_escala_linha();
     }
     if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN) {
         if (modo == 1) {
@@ -92,6 +107,8 @@ void motion(int x, int y) {
     if (transladar_selecionado(mouseX, mouseY));
     if (rotacionar_selecionado(mouseX, mouseY));
     if (transladar_selecionada(mouseX, mouseY));
+    if (rotacionar_selecionada(mouseX, mouseY));
+    if (escalar_selecionada(mouseX, mouseY));
 
     glutPostRedisplay();
 }

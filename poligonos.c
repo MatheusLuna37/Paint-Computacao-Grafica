@@ -112,6 +112,10 @@ int desenhar_poligonos(Poligonos *poligonos) {
     return 1;
 }
 
+void resetar_poligono_selecionado() {
+    SELECIONADO = 0;
+}
+
 int selecionar_poligono(float mouseX, float mouseY, Poligonos *poligonos) {
     if (poligonos == NULL) return 0;
     int count = 0;

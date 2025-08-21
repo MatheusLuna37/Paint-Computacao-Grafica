@@ -19,7 +19,11 @@ int transladar_selecionado(float mouseX, float mouseY);
 void iniciar_translado();
 void parar_translado();
 int rotacionar_selecionado(float mouseX, float mouseY);
-void iniciar_rotacao(float mouseX, float mouseY);
-void parar_rotacao(float mouseX, float mouseY);
+void iniciar_rotacao();
+void parar_rotacao();
+float **matriz_translacao(float tx, float ty);
+float **matriz_rotacao(float s, float c);
+float **ponto_homogeneo(Ponto p);
+void resetar_ponto_selecionado();
 
 #endif

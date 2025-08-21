@@ -19,5 +19,6 @@ int finalizar_poligono_atual(Poligonos *poligonos);
 int desenhar_previa_poligono(float mouseX, float mouseY);
 int cancelar_poligono_atual();
 int selecionar_poligono(float mouseX, float mouseY, Poligonos *poligonos);
+void resetar_poligono_selecionado();
 
 #endif
