@@ -4,3 +4,4 @@ obj/
 *.layout
 paint
 bin/
+.vscode/
