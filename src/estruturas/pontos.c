@@ -286,4 +286,3 @@ int excluir_todos_pontos(Pontos *pontos) {
     free(*pontos);
     return 1;
 }
-
