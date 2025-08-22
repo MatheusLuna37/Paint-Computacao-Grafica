@@ -6,3 +6,4 @@ paint
 bin/
 .vscode/
 .cbp
+*.exe
