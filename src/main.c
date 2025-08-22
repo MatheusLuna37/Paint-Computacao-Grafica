@@ -9,6 +9,7 @@
 #include "../cabecalhos/globais.h"
 #include "../cabecalhos/transformar.h"
 #include "../cabecalhos/matrizes.h"
+#include "../cabecalhos/arquivos.h"
 
 Pontos *pontos;
 Linhas *linhas;
@@ -173,6 +174,17 @@ void keyboard(unsigned char key, int x, int y) {
         case 'c':
             action = 6;
             break;
+
+        case 'u':
+            salvar_arquivo("objetos.txt", pontos, linhas, poligonos);
+            printf("Objetos salvos em objetos.txt\n");
+            break;
+        case 'k':
+            carregar_arquivo("objetos.txt", pontos, linhas, poligonos);
+            glutPostRedisplay();
+            printf("Objetos carregados de objetos.txt\n");
+            break;
+        
         case 'p':
             modo = -1;
             objeto = -1;

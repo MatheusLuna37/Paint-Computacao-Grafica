@@ -138,4 +138,3 @@ void ponto_homogeneo(float **mat, Ponto p) {
     mat[1][0] = p.y;
     mat[2][0] = 1;
 }
-
