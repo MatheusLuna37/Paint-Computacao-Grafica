@@ -16,8 +16,8 @@
 - **r**: Rotação
 - **i**: Aplica transformação
 - **c**: Cisalhamento
-- **g**: Salva todos os objetos em `objetos.txt`
-- **o**: Carrega objetos de `objetos.txt`
+- **u**: Salva todos os objetos em `objetos.txt`
+- **k**: Carrega objetos de `objetos.txt`
 - **p**: Reseta modo/objeto/ação
 
 

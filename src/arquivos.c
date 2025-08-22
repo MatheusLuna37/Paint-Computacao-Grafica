@@ -22,20 +22,20 @@ int salvar_arquivo(const char *nome, Pontos *pontos, Linhas *linhas, Poligonos *
     FILE *f = fopen(nome, "w");
     if (!f) return 0;
     // Pontos
-    int qtdP = 0;
+    int quantidadeDePontos = 0;
     PontoEl *p = *pontos;
-    while (p != NULL) { qtdP++; p = p->prox; }
-    fprintf(f, "%d\n", qtdP);
+    while (p != NULL) { quantidadeDePontos++; p = p->prox; }
+    fprintf(f, "%d\n", quantidadeDePontos);
     p = *pontos;
     while (p != NULL) {
         fprintf(f, "%f %f\n", p->ponto.x, p->ponto.y);
         p = p->prox;
     }
     // Linhas
-    int qtdL = 0;
+    int quantidadeDeLinhas = 0;
     LinhaEl *l = (linhas && *linhas) ? *linhas : NULL;
-    while (l != NULL) { qtdL++; l = l->prox; }
-    fprintf(f, "%d\n", qtdL);
+    while (l != NULL) { quantidadeDeLinhas++; l = l->prox; }
+    fprintf(f, "%d\n", quantidadeDeLinhas);
     l = (linhas && *linhas) ? *linhas : NULL;
     while (l != NULL) {
         int pontosLinha = 0;
@@ -50,10 +50,10 @@ int salvar_arquivo(const char *nome, Pontos *pontos, Linhas *linhas, Poligonos *
         l = l->prox;
     }
     // Poligonos
-    int qtdG = 0;
+    int quantidadeDePoligonos = 0;
     PoligonoEl *g = (poligonos && *poligonos) ? *poligonos : NULL;
-    while (g != NULL) { qtdG++; g = g->prox; }
-    fprintf(f, "%d\n", qtdG);
+    while (g != NULL) { quantidadeDePoligonos++; g = g->prox; }
+    fprintf(f, "%d\n", quantidadeDePoligonos);
     g = (poligonos && *poligonos) ? *poligonos : NULL;
     while (g != NULL) {
         int pontosPoligono = 0;
