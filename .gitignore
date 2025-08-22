@@ -5,5 +5,5 @@ obj/
 paint
 bin/
 .vscode/
-.cbp
+*.cbp
 *.exe
