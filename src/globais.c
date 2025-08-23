@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "../cabecalhos/globais.h"
-#include "../cabecalhos/pontos.h"
-#include "../cabecalhos/linhas.h"
-#include "../cabecalhos/poligonos.h"
+#include "../cabecalhos/estruturas/pontos.h"
+#include "../cabecalhos/estruturas/linhas.h"
+#include "../cabecalhos/estruturas/poligonos.h"
 
 float **TRANSLACAO = NULL;
 float **ROTACAO = NULL;

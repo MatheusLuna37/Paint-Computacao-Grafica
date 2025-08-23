@@ -3,17 +3,17 @@
 #include <stdbool.h>
 #include <stdio.h>
 //#include <windows.h>
-#include "../cabecalhos/pontos.h"
-#include "../cabecalhos/linhas.h"
-#include "../cabecalhos/poligonos.h"
-#include "../cabecalhos/globais.h"
-#include "../cabecalhos/transformar.h"
-#include "../cabecalhos/matrizes.h"
-#include "../cabecalhos/arquivos.h"
-#include "../cabecalhos/teclado.h"
 #include "../cabecalhos/init.h"
-#include "../cabecalhos/display.h"
-#include "../cabecalhos/motion.h"
+#include "../cabecalhos/globais.h"
+#include "../cabecalhos/estruturas/pontos.h"
+#include "../cabecalhos/estruturas/linhas.h"
+#include "../cabecalhos/estruturas/poligonos.h"
+#include "../cabecalhos/estruturas/matrizes.h"
+#include "../cabecalhos/eventos/arquivos.h"
+#include "../cabecalhos/eventos/teclado.h"
+#include "../cabecalhos/eventos/display.h"
+#include "../cabecalhos/transformacoes/transformar.h"
+#include "../cabecalhos/transformacoes/motion.h"
 
 int main(int argc, char** argv) {
     glutInit(&argc, argv);

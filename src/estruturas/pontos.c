@@ -4,10 +4,10 @@
 #include <stdbool.h>
 #include <GL/glut.h>
 #include <math.h>
-#include "../../cabecalhos/pontos.h"
-#include "../../cabecalhos/linhas.h"
-#include "../../cabecalhos/matrizes.h"
 #include "../../cabecalhos/globais.h"
+#include "../../cabecalhos/estruturas/pontos.h"
+#include "../../cabecalhos/estruturas/linhas.h"
+#include "../../cabecalhos/estruturas/matrizes.h"
 
 static float TOLERANCIA = 2;
 static Pontos PONTO_SELECIONADO = NULL;

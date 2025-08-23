@@ -1,9 +1,9 @@
 #ifndef GLOBAIS_H_INCLUDED
 #define GLOBAIS_H_INCLUDED
 
-#include "pontos.h"
-#include "linhas.h"
-#include "poligonos.h"
+#include "estruturas/pontos.h"
+#include "estruturas/linhas.h"
+#include "estruturas/poligonos.h"
 
 extern float **TRANSLACAO;
 extern float **ROTACAO;

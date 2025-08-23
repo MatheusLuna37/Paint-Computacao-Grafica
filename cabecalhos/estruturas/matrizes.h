@@ -1,7 +1,7 @@
 #ifndef MATRIZES_H_INCLUDED
 #define MATRIZES_H_INCLUDED
 
-#include "pontos.h"
+#include "../estruturas/pontos.h"
 
 float** alocar_matriz(int linhas, int colunas);
 void liberar_matriz(float** matriz, int linhas);

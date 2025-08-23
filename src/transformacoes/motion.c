@@ -3,8 +3,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#include "../../cabecalhos/motion.h"
-#include "../../cabecalhos/transformar.h"
+#include "../../cabecalhos/transformacoes/motion.h"
+#include "../../cabecalhos/transformacoes/transformar.h"
 #include "../../cabecalhos/globais.h"
 
 void motion(int x, int y) {

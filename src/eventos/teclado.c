@@ -2,11 +2,11 @@
 #include <stdlib.h>
 #include <GL/glut.h>
 #include <GL/freeglut.h>
-#include "../../cabecalhos/teclado.h"
+#include "../../cabecalhos/eventos/teclado.h"
 #include "../../cabecalhos/globais.h"
-#include "../../cabecalhos/pontos.h"
-#include "../../cabecalhos/transformar.h"
-#include "../../cabecalhos/arquivos.h"
+#include "../../cabecalhos/estruturas/pontos.h"
+#include "../../cabecalhos/transformacoes/transformar.h"
+#include "../../cabecalhos/eventos/arquivos.h"
 
 void keyboard(unsigned char key, int x, int y) {
     switch (key) {

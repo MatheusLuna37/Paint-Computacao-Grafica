@@ -3,7 +3,7 @@
 //#include <windows.h>
 #include <stdbool.h>
 #include <GL/glut.h>
-#include "../../cabecalhos/poligonos.h"
+#include "../../cabecalhos/estruturas/poligonos.h"
 
 typedef struct PoligonoEl {
     Poligono poligono;

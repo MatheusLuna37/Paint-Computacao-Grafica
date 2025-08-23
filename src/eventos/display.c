@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#include "../../cabecalhos/display.h"
+#include "../../cabecalhos/eventos/display.h"
 #include "../../cabecalhos/globais.h"
 
 void display() {
