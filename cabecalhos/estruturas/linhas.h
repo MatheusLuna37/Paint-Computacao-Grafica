@@ -1,7 +1,7 @@
 #ifndef LINHAS_H
 #define LINHAS_H
 
-#include "pontos.h"
+#include "../estruturas/pontos.h"
 
 typedef struct {
     Pontos *pontos;

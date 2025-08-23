@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "../../cabecalhos/globais.h"
-#include "../../cabecalhos/matrizes.h"
-#include "../../cabecalhos/pontos.h"
+#include "../../cabecalhos/estruturas/matrizes.h"
+#include "../../cabecalhos/estruturas/pontos.h"
 
 float** alocar_matriz(int linhas, int colunas) {
     float** matriz = (float**)malloc(linhas * sizeof(float*));

@@ -1,12 +1,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "../../cabecalhos/pontos.h"
-#include "../../cabecalhos/linhas.h"
-#include "../../cabecalhos/poligonos.h"
-#include "../../cabecalhos/matrizes.h"
 #include "../../cabecalhos/globais.h"
-#include "../../cabecalhos/transformar.h"
+#include "../../cabecalhos/estruturas/pontos.h"
+#include "../../cabecalhos/estruturas/linhas.h"
+#include "../../cabecalhos/estruturas/poligonos.h"
+#include "../../cabecalhos/estruturas/matrizes.h"
+#include "../../cabecalhos/transformacoes/transformar.h"
 
 int selecionar_objeto(float mouseX, float mouseY, Pontos *pontos, Linhas *linhas, Poligonos *poligonos, Pontos *SELECIONADO) {
     *SELECIONADO = NULL;

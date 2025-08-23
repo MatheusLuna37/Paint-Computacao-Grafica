@@ -4,9 +4,9 @@
 #include <stdbool.h>
 #include <GL/glut.h>
 #include <math.h>
-#include "../../cabecalhos/pontos.h"
-#include "../../cabecalhos/linhas.h"
-#include "../../cabecalhos/matrizes.h"
+#include "../../cabecalhos/estruturas/pontos.h"
+#include "../../cabecalhos/estruturas/linhas.h"
+#include "../../cabecalhos/estruturas/matrizes.h"
 
 static Linhas LINHA_SELECIONADA = NULL;
 static Ponto PIVO = {0,0};

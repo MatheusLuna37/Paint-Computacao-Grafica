@@ -1,7 +1,7 @@
 #ifndef POLIGONOS_H
 #define POLIGONOS_H
 
-#include "pontos.h"
+#include "../estruturas/pontos.h"
 
 typedef struct {
     Pontos *pontos;
