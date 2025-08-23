@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "../cabecalhos/arquivos.h"
+#include "../../cabecalhos/arquivos.h"
 
 
 typedef struct PontoEl {
