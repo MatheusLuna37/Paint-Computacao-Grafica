@@ -16,11 +16,6 @@ static int rotacionando = 0;
 static float prevMouseX, prevMouseY;
 static float curMouseX, curMouseY;
 
-typedef struct PontoEl {
-    Ponto ponto;
-    struct PontoEl *prox;
-} PontoEl;
-
 Pontos *inicializar_pontos() {
     Pontos *pontos = (Pontos *) malloc(sizeof(Pontos));
     *pontos = NULL;

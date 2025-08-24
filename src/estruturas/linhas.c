@@ -16,11 +16,6 @@ static int transladando = 0;
 static int rotacionando = 0;
 static int escalando = 0;
 
-typedef struct LinhaEl {
-    Linha linha;
-    struct LinhaEl *prox;
-} LinhaEl;
-
 Linhas *inicializar_linhas() {
     Linhas *linhas = (Linhas *) malloc(sizeof(Linhas));
     *linhas = NULL;

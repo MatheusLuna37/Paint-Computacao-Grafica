@@ -7,7 +7,12 @@ typedef struct {
     Pontos *pontos;
 } Linha;
 
-typedef struct LinhaEl *Linhas;
+typedef struct LinhaEl {
+    Linha linha;
+    struct LinhaEl *prox;
+} LinhaEl;
+
+typedef LinhaEl* Linhas;
 
 // Inicialização e manipulação
 Linhas *inicializar_linhas();

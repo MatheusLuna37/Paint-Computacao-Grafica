@@ -2,22 +2,6 @@
 #include <stdlib.h>
 #include "../../cabecalhos/eventos/arquivos.h"
 
-
-typedef struct PontoEl {
-    Ponto ponto;
-    struct PontoEl *prox;
-} PontoEl;
-
-typedef struct LinhaEl {
-    Linha linha;
-    struct LinhaEl *prox;
-} LinhaEl;
-
-typedef struct PoligonoEl {
-    Poligono poligono;
-    struct PoligonoEl *prox;
-} PoligonoEl;
-
 int salvar_arquivo(const char *nome, Pontos *pontos, Linhas *linhas, Poligonos *poligonos) {
     FILE *f = fopen(nome, "w");
     if (!f) return 0;
