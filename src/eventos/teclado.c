@@ -6,6 +6,7 @@
 #include "../../cabecalhos/globais.h"
 #include "../../cabecalhos/estruturas/pontos.h"
 #include "../../cabecalhos/transformacoes/transformar.h"
+#include "../../cabecalhos/transformacoes/animar.h"
 #include "../../cabecalhos/eventos/arquivos.h"
 
 void keyboard(unsigned char key, int x, int y) {
@@ -60,6 +61,18 @@ void keyboard(unsigned char key, int x, int y) {
             carregar_arquivo("objetos.txt", pontos, linhas, poligonos);
             glutPostRedisplay();
             printf("Objetos carregados de objetos.txt\n");
+            break;
+
+        case 'a':
+            iniciar_animacao();
+            break;
+
+        case 'b':
+            parar_animacao();
+            break;
+
+        case 'z':
+            reiniciar_animacao();
             break;
         
         case 'p':
