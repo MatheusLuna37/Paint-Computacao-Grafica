@@ -7,6 +7,11 @@ typedef struct {
     Pontos *pontos;
 } Poligono;
 
+typedef struct PoligonoEl {
+    Poligono poligono;
+    struct PoligonoEl *prox;
+} PoligonoEl;
+
 typedef struct PoligonoEl *Poligonos;
 
 // Inicialização e manipulação

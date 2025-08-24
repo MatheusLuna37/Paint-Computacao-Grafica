@@ -6,6 +6,11 @@ typedef struct {
     float y;
 } Ponto;
 
+typedef struct PontoEl {
+    Ponto ponto;
+    struct PontoEl *prox;
+} PontoEl;
+
 typedef struct PontoEl *Pontos;
 
 // Inicialização e manipulação

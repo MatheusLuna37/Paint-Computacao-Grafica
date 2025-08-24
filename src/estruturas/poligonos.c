@@ -5,11 +5,6 @@
 #include <GL/glut.h>
 #include "../../cabecalhos/estruturas/poligonos.h"
 
-typedef struct PoligonoEl {
-    Poligono poligono;
-    struct PoligonoEl *prox;
-} PoligonoEl;
-
 static Poligonos POLIGONO_SELECIONADO = NULL;
 static PoligonoEl *POLIGONO_EM_CONSTRUCAO = NULL;
 static Ponto PRIMEIRO_PONTO = {0,0};
