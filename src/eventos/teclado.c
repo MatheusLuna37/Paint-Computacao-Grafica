@@ -18,7 +18,7 @@ void keyboard(unsigned char key, int x, int y) {
             objeto = 2; //linha
             break;
         case '3':
-            objeto = 3; //pol�gono
+            objeto = 3; //polígono
             break;
         case 's':
             modo = 0; //selecionar
