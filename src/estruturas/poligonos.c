@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <GL/glut.h>
 #include "../../cabecalhos/estruturas/poligonos.h"
+#include "../../cabecalhos/transformacoes/animar.h"
+#include "../../cabecalhos/globais.h"
 
 static Poligonos POLIGONO_SELECIONADO = NULL;
 static PoligonoEl *POLIGONO_EM_CONSTRUCAO = NULL;
@@ -102,6 +104,10 @@ int desenhar_poligonos(Poligonos *poligonos) {
     while (aux != NULL) {
         if (aux == POLIGONO_SELECIONADO) {
             glColor3f(0, 1, 0); // Cor para pol�gono selecionado
+        } else if (aux == poligono_animado) {
+            glColor3fv(cor_animado); // Cor animada
+        } else {
+            glColor3f(0, 0, 0); // Cor padrão para obstáculos
         }
 
         // Para desenhar o pol�gono, iteramos por sua lista de pontos
@@ -109,8 +115,16 @@ int desenhar_poligonos(Poligonos *poligonos) {
             converter_vertices(aux->poligono.pontos);
         glEnd();
 
+        if (aux == poligono_animado) {
+            Ponto centro = calcular_centroide(-1, *(aux->poligono.pontos));
+            glColor3fv(cor_animado);
+            glRasterPos2f(centro.x - 18, centro.y - 6); 
+            const char* msg = "DVD";
+            for (const char* c = msg; *c; c++)
+                glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *c);
+        }
+
         aux = aux->prox;
-        glColor3f(0, 0, 0); // Reseta para a cor padr�o
     }
     return 1;
 }
