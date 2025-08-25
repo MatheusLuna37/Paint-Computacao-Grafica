@@ -1,7 +1,7 @@
-# Paint
+# 🎨 Paint
 
-Este projeto é um **Paint** desenvolvido em linguagem **C** utilizando a
-biblioteca **OpenGL** e **FreeGLUT**.\
+Este projeto é um **Paint** desenvolvido em linguagem **C** utilizando as
+ferramentas **OpenGL** e **FreeGLUT**.\
 O objetivo é fornecer uma aplicação gráfica simples para desenho de
 pontos, linhas e polígonos, além de permitir transformações geométricas.
 E, **utilizando essas estruturas**, criar uma pequena **animação** para consolidar
@@ -11,9 +11,9 @@ as habilidades adquiridas durante o processo.
 
 O projeto foi desenvolvido para composição da primeira nota da disciplina de
 computação gráfica e foi implementado com o intuito de colocar em prática
-conhecimentos teóricos acerca da **computação gráfica**. Aprender o uso
+conhecimentos teóricos adquiridos durante as aulas. Aprender o uso
 da biblioteca **OpenGL** para criação de interfaces gráficas. Implementar 
-estruturas de dados e **manipulação gráfica**. Explorar transformações como 
+estruturas de dados e **manipulação gráfica**. E explorar transformações como 
 **translação**, **rotação** e **escala**.
 
 ## ⚙️ Funcionalidades
@@ -52,8 +52,6 @@ estruturas de dados e **manipulação gráfica**. Explorar transformações como
     │   │   └── teclado.c
     ├── cabecalhos/
 
--   A estrutura é a mesma para os cabecalhos
-
 -   **main.c**: ponto de entrada do programa.
 -   **estruturas/**: contém implementações de pontos, linhas, polígonos
     e matrizes.
@@ -61,6 +59,7 @@ estruturas de dados e **manipulação gráfica**. Explorar transformações como
     geométricas.
 -   **eventos**: funções responsáveis por capturar eventos de interatividade
     do usuário com o sistema através do teclado e mouse.
+-   A estrutura é a mesma para os cabecalhos
 
 ## 🚀 Como Compilar e Executar
 
