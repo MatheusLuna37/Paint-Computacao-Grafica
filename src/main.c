@@ -2,6 +2,7 @@
 #include <GL/freeglut.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <time.h> 
 //#include <windows.h>
 #include "../cabecalhos/init.h"
 #include "../cabecalhos/globais.h"
@@ -16,6 +17,7 @@
 #include "../cabecalhos/transformacoes/motion.h"
 
 int main(int argc, char** argv) {
+    srand(time(NULL));
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
     glutInitWindowSize(screenWidth, screenHeight);
