@@ -2,7 +2,7 @@
 #include <GL/freeglut.h>
 #include <stdbool.h>
 #include <stdio.h>
-//#include <windows.h>
+#include <windows.h>
 #include "../cabecalhos/init.h"
 #include "../cabecalhos/globais.h"
 #include "../cabecalhos/estruturas/pontos.h"

@@ -36,4 +36,6 @@ int selecionar_poligono(float mouseX, float mouseY, Poligonos *poligonos);
 int excluir_poligono_selecionado(Poligonos *poligonos);
 int excluir_todos_poligonos(Poligonos *poligonos);
 
+int transformarParaFechoConvexo(Pontos ponto_inicial);
+
 #endif // POLIGONOS_H
