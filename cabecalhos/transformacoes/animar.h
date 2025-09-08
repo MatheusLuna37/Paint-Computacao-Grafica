@@ -6,6 +6,8 @@
 #include "../estruturas/linhas.h"
 #include "../estruturas/poligonos.h"
 
+void hsv_para_rgb(float h, float s, float v, float rgb[3]);
+void sortear_cor(float cor[3]);
 void reiniciar_animacao();
 void excluir_tudo();
 void calcular_bounding_box

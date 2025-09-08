@@ -1,5 +1,7 @@
 #include <GL/glut.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <time.h> 
 #include <math.h>
 #include "../../cabecalhos/globais.h"
 #include "../../cabecalhos/estruturas/linhas.h"
@@ -8,12 +10,44 @@
 #include "../../cabecalhos/estruturas/matrizes.h"
 #include "../../cabecalhos/transformacoes/animar.h"
 
-Poligonos poligono_animado = NULL;
-
 // Controle da animação DVD
 static float dvd_dx = 4, dvd_dy = 4;
 static bool animando = false;
+
 bool game_over = false;
+
+void hsv_para_rgb(float h, float s, float v, float rgb[3]) {
+    float c = v * s;
+    float x = c * (1 - fabs(fmod(h * 6, 2) - 1));
+    float m = v - c;
+    float r, g, b;
+
+    if      (h < 1.0/6) { r = c; g = x; b = 0; }
+    else if (h < 2.0/6) { r = x; g = c; b = 0; }
+    else if (h < 3.0/6) { r = 0; g = c; b = x; }
+    else if (h < 4.0/6) { r = 0; g = x; b = c; }
+    else if (h < 5.0/6) { r = x; g = 0; b = c; }
+    else                { r = c; g = 0; b = x; }
+
+    rgb[0] = r + m;
+    rgb[1] = g + m;
+    rgb[2] = b + m;
+}
+
+void sortear_cor(float cor[3]) {
+    float h, s, v, nova_cor[3];
+    do {
+        h = (float)rand() / RAND_MAX;           // Matiz: 0 a 1
+        s = 0.7f + 0.3f * ((float)rand() / RAND_MAX); // Saturação: 0.7 a 1.0 (cores vivas)
+        v = 0.7f + 0.3f * ((float)rand() / RAND_MAX); // Valor: 0.7 a 1.0 (brilho alto)
+        hsv_para_rgb(h, s, v, nova_cor);
+    } while (
+        (fabs(nova_cor[0] - cor[0]) < 0.15f && fabs(nova_cor[1] - cor[1]) < 0.15f && fabs(nova_cor[2] - cor[2]) < 0.15f)
+    );
+    cor[0] = nova_cor[0];
+    cor[1] = nova_cor[1];
+    cor[2] = nova_cor[2];
+}
 
 void reiniciar_animacao() {
     dvd_dx = 4;
@@ -172,10 +206,18 @@ void animar(int value) {
         calcular_bounding_box(*(p->poligono.pontos), &minX, &maxX, &minY, &maxY);
 
         // Colisão com bordas
-        if (minX + dvd_dx < 0 || maxX + dvd_dx > screenWidth)
+        bool mudou = false;
+        if (minX + dvd_dx < 0 || maxX + dvd_dx > screenWidth) {
             dvd_dx = -dvd_dx;
-        if (minY + dvd_dy < 0 || maxY + dvd_dy > screenHeight)
+            mudou = true;
+        }
+        if (minY + dvd_dy < 0 || maxY + dvd_dy > screenHeight) {
             dvd_dy = -dvd_dy;
+            mudou = true;
+        }
+        if (mudou) {
+            sortear_cor(cor_animado);
+        }
 
         // Colisão com outros polígonos (GAME OVER)
         if (checar_colisao_poligonos(poligono_animado, minX, maxX, minY, maxY)) {
