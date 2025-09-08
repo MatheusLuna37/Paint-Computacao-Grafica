@@ -3,6 +3,7 @@
 //#include <windows.h>
 #include <stdbool.h>
 #include <GL/glut.h>
+#include <math.h>
 #include "../../cabecalhos/estruturas/poligonos.h"
 #include "../../cabecalhos/transformacoes/animar.h"
 #include "../../cabecalhos/globais.h"
@@ -192,3 +193,202 @@ int excluir_todos_poligonos(Poligonos *poligonos) {
     free(*poligonos);
     return 1;
 }
+
+/* =================== Funções auxiliares =================== */
+
+// Produto vetorial (p->q) x (p->r)
+float cross(Ponto p, Ponto q, Ponto r) {
+    return (q.x - p.x) * (r.y - p.y) - (q.y - p.y) * (r.x - p.x);
+}
+
+// Distância quadrada
+double dist2(Ponto a, Ponto b) {
+    double dx = a.x - b.x, dy = a.y - b.y;
+    return dx * dx + dy * dy;
+}
+
+// Comparador para ordenar por ângulo polar (usado no Graham Scan)
+static Ponto p0; // ponto de referência
+int cmpPolar(const void *a, const void *b) {
+    Ponto *p1 = (Ponto *)a, *p2 = (Ponto *)b;
+    float c = cross(p0, *p1, *p2);
+    if (fabs(c) < 1e-9) return (dist2(p0, *p1) < dist2(p0, *p2)) ? -1 : 1;
+    return (c > 0) ? -1 : 1;
+}
+
+/* =================== Graham Scan =================== */
+int grahamScan(Ponto *pontos, int n, Ponto *hull) {
+    if (n <= 1) {
+        if (n == 1) hull[0] = pontos[0];
+        return n;
+    }
+
+    // Encontrar ponto mais baixo (e mais à esquerda em caso de empate)
+    int ymin = 0;
+    for (int i = 1; i < n; i++) {
+        if (pontos[i].y < pontos[ymin].y ||
+           (pontos[i].y == pontos[ymin].y && pontos[i].x < pontos[ymin].x)) {
+            ymin = i;
+        }
+    }
+    // Trocar para posição 0
+    Ponto temp = pontos[0];
+    pontos[0] = pontos[ymin];
+    pontos[ymin] = temp;
+    p0 = pontos[0];
+
+    // Ordenar por ângulo polar
+    qsort(pontos + 1, n - 1, sizeof(Ponto), cmpPolar);
+
+    // Construir fecho
+    int m = 0;
+    hull[m++] = pontos[0];
+    hull[m++] = pontos[1];
+    for (int i = 2; i < n; i++) {
+        while (m > 1 && cross(hull[m-2], hull[m-1], pontos[i]) <= 0) {
+            m--;
+        }
+        hull[m++] = pontos[i];
+    }
+    return m;
+}
+
+/* =================== Jarvis March adaptado =================== */
+// Encontra o próximo ponto no fecho entre fechos parciais
+Ponto nextHullPoint(Ponto **hulls, int *sizes, int k, Ponto current) {
+    Ponto best;
+    int found = 0;
+
+    for (int i = 0; i < k; i++) {
+        for (int j = 0; j < sizes[i]; j++) {
+            Ponto candidate = hulls[i][j];
+
+            if (!found) {
+                best = candidate;
+                found = 1;
+            } else {
+                float c = cross(current, best, candidate);
+                if (c < 0 || (fabs(c) < 1e-9 && dist2(current, candidate) > dist2(current, best))) {
+                    best = candidate;
+                }
+            }
+        }
+    }
+    return best;
+}
+
+/* =================== Chan’s Algorithm =================== */
+int chanHull(Ponto *pontos, int n, Ponto *hull) {
+    int m = 4; // tamanho inicial do bloco
+
+    while (1) {
+        int k = (n + m - 1) / m; // número de blocos
+        Ponto **partialHulls = malloc(k * sizeof(Ponto *));
+        int *sizes = malloc(k * sizeof(int));
+
+        // Rodar Graham Scan em cada bloco
+        for (int i = 0; i < k; i++) {
+            int start = i * m;
+            int end = (i+1) * m;
+            if (end > n) end = n;
+            int size = end - start;
+
+            partialHulls[i] = malloc(size * sizeof(Ponto));
+            sizes[i] = grahamScan(pontos + start, size, partialHulls[i]);
+        }
+
+        // Jarvis March sobre os fechos parciais
+        int h = 0;
+        // Encontrar ponto inicial global (menor y, e menor x em caso de empate)
+        int idx = 0;
+        for (int i = 1; i < n; i++) {
+            if (pontos[i].y < pontos[idx].y ||
+               (pontos[i].y == pontos[idx].y && pontos[i].x < pontos[idx].x)) {
+                idx = i;
+            }
+        }
+        hull[h++] = pontos[idx];
+
+        for (int step = 0; step < m; step++) {
+            Ponto best = nextHullPoint(partialHulls, sizes, k, hull[h-1]);
+
+            // Fecho fechado (voltamos ao início)
+            if (best.x == hull[0].x && best.y == hull[0].y) {
+                for (int i = 0; i < k; i++) free(partialHulls[i]);
+                free(partialHulls);
+                free(sizes);
+                return h;
+            }
+
+            hull[h++] = best;
+        }
+
+        // liberar memória
+        for (int i = 0; i < k; i++) free(partialHulls[i]);
+        free(partialHulls);
+        free(sizes);
+
+        // aumentar m e tentar de novo
+        if (m >= n) break; // limite
+        m *= m;
+        if (m > n) m = n;
+    }
+
+    return 0; // fallback, não deveria chegar aqui
+}
+
+
+int transformarParaFechoConvexo(PontoEl *ponto_inicial) {
+    if (ponto_inicial == NULL) return 0;
+
+    // 1. Contar pontos
+    int n = 0;
+    PontoEl *aux = ponto_inicial;
+    while (aux != NULL) {
+        n++;
+        aux = aux->prox;
+    }
+
+    // 2. Copiar para array
+    Ponto *pontos = malloc(n * sizeof(Ponto));
+    aux = ponto_inicial;
+    for (int i = 0; i < n; i++) {
+        pontos[i] = aux->ponto;
+        aux = aux->prox;
+    }
+
+    // 3. Rodar ChanHull
+    Ponto *hull = malloc(n * sizeof(Ponto));
+    int h = chanHull(pontos, n, hull);
+
+    // 4. Sobrescrever lista original com o fecho
+    aux = ponto_inicial;
+    PontoEl *ant = NULL;
+    int i = 0;
+    while (aux != NULL && i < h) {
+        aux->ponto = hull[i];
+        ant = aux;
+        aux = aux->prox;
+        i++;
+    }
+
+    // 5. Cortar a lista no ponto certo
+    if (ant != NULL) {
+        ant->prox = NULL;
+    }
+
+    // 6. Liberar nós extras
+    while (aux != NULL) {
+        ant = aux;
+        aux = aux->prox;
+        free(ant);
+    }
+
+    // 7. Liberar arrays auxiliares
+    free(pontos);
+    free(hull);
+
+    return 1;
+}
+
+

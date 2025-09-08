@@ -74,11 +74,16 @@ void keyboard(unsigned char key, int x, int y) {
         case 'z':
             reiniciar_animacao();
             break;
-        
+        case 'f':
+            action = 7; //fecho convexo
+            aplicar_transformacao(action, objeto, mouseX, mouseY, 0, SELECIONADO);
+            glutPostRedisplay();
+            break;
         case 'p':
             modo = -1;
             objeto = -1;
             action = -1;
+            break;
         default:
             objeto = -1; //nenhum
             modo = -1; //nenhum

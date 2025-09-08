@@ -2,8 +2,8 @@
 #include <GL/freeglut.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <time.h> 
 //#include <windows.h>
+#include <time.h> 
 #include "../cabecalhos/init.h"
 #include "../cabecalhos/globais.h"
 #include "../cabecalhos/estruturas/pontos.h"

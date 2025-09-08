@@ -37,7 +37,7 @@ int aplicar_transformacao(int action, int objeto, float mouseX, float mouseY, in
     if (objeto == 3) qtd = -1;
 
     Ponto centroide = calcular_centroide(qtd, ponto_inicial);
-    if (centroide.x == -1 && centroide.y == -1) {printf("n�o passei"); return 0;}
+    if (centroide.x == -1 && centroide.y == -1) return 0;
     float **mat;
     matriz_translacao(TRANSLACAO, 0, 0);
     mat = TRANSLACAO;
@@ -87,6 +87,12 @@ int aplicar_transformacao(int action, int objeto, float mouseX, float mouseY, in
         if (dir < 0) matriz_cisalhamento_centroide(CISALHAMENTO_CENTROIDE, -0.1, centroide.x, centroide.y);
         if (dir == 0) matriz_cisalhamento_centroide(CISALHAMENTO_CENTROIDE, 0, centroide.x, centroide.y);
         mat = CISALHAMENTO_CENTROIDE;
+    }
+    if (action == 7) {
+        if (objeto == 3) {
+            if (transformarParaFechoConvexo(ponto_inicial)) return 1;
+            return 0;
+        }
     }
 
     printf("quase l�");
